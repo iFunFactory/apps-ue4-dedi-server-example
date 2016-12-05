@@ -36,8 +36,10 @@ public class ShooterGame : ModuleRules
 				"Slate",
 				"SlateCore",
 				"ShooterGameLoadingScreen",
-				"Json"
-			}
+				"Json",
+				"Http",
+				"FunapiDedicatedServer"
+            }
 		);
 
 		DynamicallyLoadedModuleNames.AddRange(

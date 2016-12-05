@@ -18,6 +18,7 @@
 #include "Online/ShooterPlayerState.h"
 #include "Online/ShooterGameSession.h"
 #include "Online/ShooterOnlineSessionClient.h"
+#include "FunapiDedicatedServer.h"
 
 
 void SShooterWaitDialog::Construct(const FArguments& InArgs)
@@ -283,51 +284,66 @@ void UShooterGameInstance::HandleDemoPlaybackFailure( EDemoPlayFailure::Type Fai
 
 void UShooterGameInstance::StartGameInstance()
 {
+  TFunction<void(FHttpResponsePtr response)> func = [this](FHttpResponsePtr response) {
+    if (response.IsValid()) {
+      FString json_fstring = response->GetContentAsString();
+      UE_LOG(LogTemp, Log, TEXT("Config JSON string = %s"), *json_fstring);
+    }
+
 #if PLATFORM_PS4 == 0
-	TCHAR Parm[4096] = TEXT("");
+    TCHAR Parm[4096] = TEXT("");
 
-	const TCHAR* Cmd = FCommandLine::Get();
+    const TCHAR* Cmd = FCommandLine::Get();
 
-	// Catch the case where we want to override the map name on startup (used for connecting to other MP instances)
-	if (FParse::Token(Cmd, Parm, ARRAY_COUNT(Parm), 0) && Parm[0] != '-')
-	{
-		// if we're 'overriding' with the default map anyway, don't set a bogus 'playing' state.
-		if (!MainMenuMap.Contains(Parm))
-		{
-			FURL DefaultURL;
-			DefaultURL.LoadURLConfig(TEXT("DefaultPlayer"), GGameIni);
+    // Catch the case where we want to override the map name on startup (used for connecting to other MP instances)
+    if (FParse::Token(Cmd, Parm, ARRAY_COUNT(Parm), 0) && Parm[0] != '-')
+    {
+      // if we're 'overriding' with the default map anyway, don't set a bogus 'playing' state.
+      if (!MainMenuMap.Contains(Parm))
+      {
+        FURL DefaultURL;
+        DefaultURL.LoadURLConfig(TEXT("DefaultPlayer"), GGameIni);
 
-			FURL URL(&DefaultURL, Parm, TRAVEL_Partial);
+        FURL URL(&DefaultURL, Parm, TRAVEL_Partial);
 
-			if (URL.Valid)
-			{
-				UEngine* const Engine = GetEngine();
+        if (URL.Valid)
+        {
+          UEngine* const Engine = GetEngine();
 
-				FString Error;
+          FString Error;
 
-				const EBrowseReturnVal::Type BrowseRet = Engine->Browse(*WorldContext, URL, Error);
+          const EBrowseReturnVal::Type BrowseRet = Engine->Browse(*WorldContext, URL, Error);
 
-				if (BrowseRet == EBrowseReturnVal::Success)
-				{
-					// Success, we loaded the map, go directly to playing state
-					GotoState(ShooterGameInstanceState::Playing);
-					return;
-				}
-				else if (BrowseRet == EBrowseReturnVal::Pending)
-				{
-					// Assume network connection
-					LoadFrontEndMap(MainMenuMap);
-					AddNetworkFailureHandlers();
-					ShowLoadingScreen();
-					GotoState(ShooterGameInstanceState::Playing);
-					return;
-				}
-			}
-		}
-	}
+          if (BrowseRet == EBrowseReturnVal::Success)
+          {
+            // Success, we loaded the map, go directly to playing state
+            GotoState(ShooterGameInstanceState::Playing);
+            return;
+          }
+          else if (BrowseRet == EBrowseReturnVal::Pending)
+          {
+            // Assume network connection
+            LoadFrontEndMap(MainMenuMap);
+            AddNetworkFailureHandlers();
+            ShowLoadingScreen();
+            GotoState(ShooterGameInstanceState::Playing);
+            return;
+          }
+        }
+      }
+    }
 #endif
 
-	GotoInitialState();
+    GotoInitialState();
+  };
+
+  if (IsDedicatedServerInstance()) {
+    fun::FunapiDedicatedServer::CommandLine(FCommandLine::Get(), "FunapiMatchID", "FunapiManagerServer");
+    fun::FunapiDedicatedServer::Get(func);
+  }
+  else {
+    func(nullptr);
+  }
 }
 
 FName UShooterGameInstance::GetInitialState()

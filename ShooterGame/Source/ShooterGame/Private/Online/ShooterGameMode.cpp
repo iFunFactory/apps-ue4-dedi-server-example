@@ -10,6 +10,7 @@
 #include "Online/ShooterGameSession.h"
 #include "Bots/ShooterAIController.h"
 #include "ShooterTeamStart.h"
+#include "FunapiDedicatedServer.h"
 
 
 AShooterGameMode::AShooterGameMode(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -50,6 +51,10 @@ void AShooterGameMode::InitGame(const FString& MapName, const FString& Options, 
 	{
 		bPauseable = false;
 	}
+
+  // test code
+  fun::FunapiDedicatedServer::Ready();
+  // //
 }
 
 void AShooterGameMode::SetAllowBots(bool bInAllowBots, int32 InMaxBots)
@@ -250,6 +255,10 @@ bool AShooterGameMode::IsWinner(class AShooterPlayerState* PlayerState) const
 
 void AShooterGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
+  if (fun::FunapiDedicatedServer::Auth(Options, "FunapiUID", "FunapiToken", ErrorMessage) == false) {
+    return;
+  }
+
 	AShooterGameState* const MyGameState = Cast<AShooterGameState>(GameState);
 	const bool bMatchIsOver = MyGameState && MyGameState->HasMatchEnded();
 	if( bMatchIsOver )
@@ -538,3 +547,13 @@ void AShooterGameMode::RestartGame()
 	Super::RestartGame();
 }
 
+void AShooterGameMode::Logout(AController* Exiting)
+{
+  // UE_LOG(LogTemp, Log, TEXT("Logout"));
+
+  // test code
+  fun::FunapiDedicatedServer::Result(FString("{ \"message\":\"result\"}"), false);
+  // //
+
+  Super::Logout(Exiting);
+}

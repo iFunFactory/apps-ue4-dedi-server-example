@@ -15,6 +15,9 @@
 #include "ShooterPlayerController.h"
 #include "ShooterGameClasses.h"
 
+#include "Json.h"
+#include "Http.h"
+
 
 class UBehaviorTreeComponent;
 

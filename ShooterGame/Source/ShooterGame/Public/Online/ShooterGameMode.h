@@ -147,4 +147,6 @@ public:
 	UPROPERTY()
 	TArray<AShooterPickup*> LevelPickups;
 
+public:
+  virtual void Logout(AController* Exiting);
 };

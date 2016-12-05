@@ -45,6 +45,10 @@
 		{
 			"Name": "OnlineSubsystemNull",
 			"Enabled": true
+		},
+		{
+			"Name": "FunapiDedicatedServer",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
