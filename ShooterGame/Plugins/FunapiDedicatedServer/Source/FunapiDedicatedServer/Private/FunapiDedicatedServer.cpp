@@ -12,7 +12,7 @@ namespace fun {
   static FString funapi_manager_server;
   static TMap<FString, FString> auth_map;
 
-  bool FunapiDedicatedServer::CommandLine(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field)
+  bool FunapiDedicatedServer::ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field)
   {
     bool ret = true;
 
@@ -45,7 +45,7 @@ namespace fun {
     return ret;
   }
 
-  void FunapiDedicatedServer::Get(const TFunction<void(FHttpResponsePtr response)> &completion_handler) {
+  void FunapiDedicatedServer::GetGameInfo(const TFunction<void(FHttpResponsePtr response)> &completion_handler) {
     if (funapi_manager_server.IsEmpty()) {
       completion_handler(nullptr);
       return;
