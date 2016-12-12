@@ -12,10 +12,12 @@ namespace fun {
   {
   public:
     static bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field);
+    static bool ParseConsoleCommand(const TCHAR* cmd);
     static void GetGameInfo(const TFunction<void(FHttpResponsePtr response)> &completion_handler);
-    static void Ready();
-    static void Result(const FString &json_string, const bool use_exit);
-    static bool Auth(const FString& options, const FString& uid_field, const FString& token_field, FString &error_message);
+    static void PostReady();
+    static void PostResult(const FString &json_string, const bool use_exit);
+    static bool AuthUser(const FString& options, const FString& uid_field, const FString& token_field, FString &error_message);
+    static bool AuthUser(const FString& options, FString &error_message);
   };
 
 }

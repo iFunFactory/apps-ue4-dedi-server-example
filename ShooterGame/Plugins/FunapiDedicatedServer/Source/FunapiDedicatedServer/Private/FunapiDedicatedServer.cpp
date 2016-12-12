@@ -12,6 +12,11 @@ namespace fun {
   static FString funapi_manager_server;
   static TMap<FString, FString> auth_map;
 
+  bool FunapiDedicatedServer::ParseConsoleCommand(const TCHAR* cmd)
+  {
+    return FunapiDedicatedServer::ParseConsoleCommand(cmd, "FunapiMatchID", "FunapiManagerServer");
+  }
+
   bool FunapiDedicatedServer::ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field)
   {
     bool ret = true;
@@ -99,7 +104,7 @@ namespace fun {
     http_request->ProcessRequest();
   }
 
-  void FunapiDedicatedServer::Ready()
+  void FunapiDedicatedServer::PostReady()
   {
     if (funapi_manager_server.IsEmpty()) {
       return;
@@ -126,7 +131,7 @@ namespace fun {
     http_request->ProcessRequest();
   }
 
-  void FunapiDedicatedServer::Result(const FString &json_string, const bool use_exit)
+  void FunapiDedicatedServer::PostResult(const FString &json_string, const bool use_exit)
   {
     if (funapi_manager_server.IsEmpty()) {
       return;
@@ -159,7 +164,12 @@ namespace fun {
     http_request->ProcessRequest();
   }
 
-  bool FunapiDedicatedServer::Auth(const FString& options, const FString& uid_field, const FString& token_field, FString &error_message)
+  bool FunapiDedicatedServer::AuthUser(const FString& options, FString &error_message)
+  {
+    return FunapiDedicatedServer::AuthUser(options, "FunapiUID", "FunapiToken", error_message);
+  }
+
+  bool FunapiDedicatedServer::AuthUser(const FString& options, const FString& uid_field, const FString& token_field, FString &error_message)
   {
     if (funapi_manager_server.IsEmpty()) {
       return true;
@@ -184,7 +194,7 @@ namespace fun {
       return false;
     }
     else {
-      UE_LOG(LogFunapiDedicatedServer, Log, TEXT("[PreLogin] token: %s"), *token);
+      UE_LOG(LogFunapiDedicatedServer, Log, TEXT("[Auth] token: %s"), *token);
     }
 
     bool ret = false;

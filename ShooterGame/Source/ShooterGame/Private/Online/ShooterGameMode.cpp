@@ -53,7 +53,7 @@ void AShooterGameMode::InitGame(const FString& MapName, const FString& Options, 
 	}
 
   // test code
-  fun::FunapiDedicatedServer::Ready();
+  fun::FunapiDedicatedServer::PostReady();
   // //
 }
 
@@ -255,7 +255,7 @@ bool AShooterGameMode::IsWinner(class AShooterPlayerState* PlayerState) const
 
 void AShooterGameMode::PreLogin(const FString& Options, const FString& Address, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
 {
-  if (fun::FunapiDedicatedServer::Auth(Options, "FunapiUID", "FunapiToken", ErrorMessage) == false) {
+  if (fun::FunapiDedicatedServer::AuthUser(Options, ErrorMessage) == false) {
     return;
   }
 
@@ -552,7 +552,7 @@ void AShooterGameMode::Logout(AController* Exiting)
   // UE_LOG(LogTemp, Log, TEXT("Logout"));
 
   // test code
-  fun::FunapiDedicatedServer::Result(FString("{ \"message\":\"result\"}"), false);
+  fun::FunapiDedicatedServer::PostResult(FString("{ \"message\":\"result\"}"), false);
   // //
 
   Super::Logout(Exiting);

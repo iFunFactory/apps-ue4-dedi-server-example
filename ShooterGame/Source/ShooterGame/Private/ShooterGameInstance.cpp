@@ -338,7 +338,7 @@ void UShooterGameInstance::StartGameInstance()
   };
 
   if (IsDedicatedServerInstance()) {
-    fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get(), "FunapiMatchID", "FunapiManagerServer");
+    fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get());
     fun::FunapiDedicatedServer::GetGameInfo(func);
   }
   else {
