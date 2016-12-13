@@ -38,10 +38,14 @@ public class ShooterGame : ModuleRules
 				"ShooterGameLoadingScreen",
 				"Json",
 				"Http",
-				"FunapiDedicatedServer",
-                "Funapi"
+				"FunapiDedicatedServer"
             }
 		);
+
+		if (Target.Type != TargetRules.TargetType.Server)
+		{
+			PrivateDependencyModuleNames.Add("Funapi");
+		}
 
 		DynamicallyLoadedModuleNames.AddRange(
 			new string[] {
