@@ -184,13 +184,22 @@ void AShooterGameMode::FinishMatch()
 		DetermineMatchWinner();		
 
 		// notify players
+		TSharedRef<FJsonObject> json_object = MakeShareable(new FJsonObject);
+		TArray<TSharedPtr<FJsonValue>> result_array_json;
 		for (FConstControllerIterator It = GetWorld()->GetControllerIterator(); It; ++It)
 		{
 			AShooterPlayerState* PlayerState = Cast<AShooterPlayerState>((*It)->PlayerState);
-			const bool bIsWinner = IsWinner(PlayerState);
 
+			TSharedRef<FJsonObject> player_result_object = MakeShareable(new FJsonObject);
+			player_result_object->SetStringField(FString("uid"), PlayerState->GetUID());
+			player_result_object->SetNumberField(FString("kill"), PlayerState->GetKills());
+			player_result_object->SetNumberField(FString("death"), PlayerState->GetDeaths());
+			result_array_json.Add(MakeShareable(new FJsonValueObject(player_result_object)));
+
+			const bool bIsWinner = IsWinner(PlayerState);
 			(*It)->GameHasEnded(NULL, bIsWinner);
 		}
+		json_object->SetArrayField(FString("result"), result_array_json);
 
 		// lock all pawns
 		// pawns are not marked as keep for seamless travel, so we will create new pawns on the next match rather than
@@ -203,7 +212,12 @@ void AShooterGameMode::FinishMatch()
 		// set up to restart the match
 		MyGameState->RemainingTime = TimeBetweenMatches;
 
-		fun::FunapiDedicatedServer::PostResult(FString("{}"), true);
+		FString ouput_fstring;
+		TSharedRef<TJsonWriter<TCHAR>> writer = TJsonWriterFactory<TCHAR>::Create(&ouput_fstring);
+		FJsonSerializer::Serialize(json_object, writer);
+		UE_LOG(LogTemp, Log, TEXT("%s"), *ouput_fstring);
+
+		fun::FunapiDedicatedServer::PostResult(ouput_fstring, true);
 	}
 }
 
@@ -274,6 +288,15 @@ void AShooterGameMode::PreLogin(const FString& Options, const FString& Address, 
 	}
 }
 
+APlayerController* AShooterGameMode::Login(UPlayer* NewPlayer, ENetRole InRemoteRole, const FString& Portal, const FString& Options, const FUniqueNetIdRepl& UniqueId, FString& ErrorMessage)
+{
+	APlayerController* newPlayer = Super::Login(NewPlayer, InRemoteRole, Portal, Options, UniqueId, ErrorMessage);
+	FString uid = UGameplayStatics::ParseOption(Options, "FunapiUID");
+	AShooterPlayerController* NewPC = Cast<AShooterPlayerController>(newPlayer);
+	AShooterPlayerState* NewPS = Cast<AShooterPlayerState>(NewPC->PlayerState);
+	NewPS->SetUID(uid);
+	return newPlayer;
+}
 
 void AShooterGameMode::PostLogin(APlayerController* NewPlayer)
 {
@@ -551,8 +574,5 @@ void AShooterGameMode::RestartGame()
 
 void AShooterGameMode::Logout(AController* Exiting)
 {
-  // UE_LOG(LogTemp, Log, TEXT("Logout"));
-  // //
-
   Super::Logout(Exiting);
 }

@@ -208,3 +208,13 @@ FString AShooterPlayerState::GetShortPlayerName() const
 	}
 	return PlayerName;
 }
+
+void AShooterPlayerState::SetUID(FString uid)
+{
+	UID = FString(uid);
+}
+
+FString AShooterPlayerState::GetUID()
+{
+	return UID;
+}

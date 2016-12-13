@@ -82,6 +82,10 @@ class AShooterPlayerState : public APlayerState
 	void SetQuitter(bool bInQuitter);
 
 	virtual void CopyProperties(class APlayerState* PlayerState) override;
+
+	void SetUID(FString uid);
+	FString GetUID();
+
 protected:
 
 	/** Set the mesh colors based on the current teamnum variable */
@@ -113,4 +117,7 @@ protected:
 
 	/** helper for scoring points */
 	void ScorePoints(int32 Points);
+
+private:
+	FString UID;
 };
