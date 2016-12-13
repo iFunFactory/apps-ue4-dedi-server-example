@@ -342,8 +342,196 @@ void UShooterGameInstance::StartGameInstance()
     fun::FunapiDedicatedServer::GetGameInfo(func);
   }
   else {
-    func(nullptr);
+    if (TestFunapiServerConnect() == false) {
+      func(nullptr);
+    }    
   }
+}
+
+bool UShooterGameInstance::TestFunapiServerConnect() 
+{
+#if UE_SERVER == 0
+  const FString funapi_server_field = "FunapiServer";
+  const FString funapi_server_port_field = "FunapiServerPort";
+
+  FString FunapiServer = "harida-vm.ifunfactory.com";
+  FString FunapiServerPort = "8012"; 
+
+  if (FParse::Value(FCommandLine::Get(), *funapi_server_field, FunapiServer))
+  {
+    FunapiServer = FunapiServer.Replace(TEXT("="), TEXT("")).Replace(TEXT("\""), TEXT("")); // replace quotes
+    UE_LOG(LogTemp, Log, TEXT("%s = '%s'"), *funapi_server_field, *FunapiServer);
+  }
+  else {
+    return false;
+  }
+
+  if (FParse::Value(FCommandLine::Get(), *funapi_server_port_field, FunapiServerPort))
+  {
+    FunapiServerPort = FunapiServerPort.Replace(TEXT("="), TEXT("")).Replace(TEXT("\""), TEXT("")); // replace quotes
+    UE_LOG(LogTemp, Log, TEXT("%s = '%s'"), *funapi_server_port_field, *FunapiServerPort);
+  }
+  else {
+    return false;
+  }
+
+  std::string kServer = TCHAR_TO_UTF8(*FunapiServer);
+  int kPort = FCString::Atoi(*FunapiServerPort);
+
+  // create
+  session_ = fun::FunapiSession::Create(kServer.c_str(), false);
+
+  // add session callbacks
+  session_->AddSessionEventCallback([this](const std::shared_ptr<fun::FunapiSession> &session,
+    const fun::TransportProtocol transport_protocol,
+    const fun::SessionEventType type,
+    const std::string &session_id,
+    const std::shared_ptr<fun::FunapiError> &error) {
+    if (type == fun::SessionEventType::kOpened) {
+      UE_LOG(LogTemp, Log, TEXT("Session initiated: %s"), *FString(session_id.c_str()));
+
+      // send login packet
+      TSharedRef<FJsonObject> json_object = MakeShareable(new FJsonObject);
+      FGuid fguid;
+      playerId = fguid.NewGuid().ToString(EGuidFormats::Digits);
+      UE_LOG(LogTemp, Log, TEXT("name : %s"), *playerId);
+      json_object->SetStringField(FString("name"), playerId);
+
+      // Convert JSON document to string
+      FString ouput_fstring;
+      TSharedRef<TJsonWriter<TCHAR>> writer = TJsonWriterFactory<TCHAR>::Create(&ouput_fstring);
+      FJsonSerializer::Serialize(json_object, writer);
+      std::string json_stiring = TCHAR_TO_ANSI(*ouput_fstring);
+
+      session_->SendMessage("login", json_stiring);
+    }
+    else if (type == fun::SessionEventType::kChanged) {
+      // session id changed
+    }
+    else if (type == fun::SessionEventType::kClosed) {
+      
+    }
+  });
+
+  // add transport callbacks
+  session_->AddTransportEventCallback([this](const std::shared_ptr<fun::FunapiSession> &session,
+    const fun::TransportProtocol transport_protocol,
+    const fun::TransportEventType type,
+    const std::shared_ptr<fun::FunapiError> &error) {
+    if (type == fun::TransportEventType::kStarted) {
+
+    }
+    else if (type == fun::TransportEventType::kStopped) {
+
+    }
+    else if (type == fun::TransportEventType::kConnectionFailed) {
+      // session_ = nullptr;
+    }
+    else if (type == fun::TransportEventType::kConnectionTimedOut) {
+      // session_ = nullptr;
+    }
+    else if (type == fun::TransportEventType::kDisconnected) {
+    }
+  });
+
+  // add json receive callback
+  session_->AddJsonRecvCallback([this](const std::shared_ptr<fun::FunapiSession> &session,
+    const fun::TransportProtocol transport_protocol,
+    const std::string &msg_type,
+    const std::string &json_string) {
+
+    if (msg_type.compare("_sc_dedicated_server") == 0)
+    {
+      UE_LOG(LogTemp, Log, TEXT("'_sc_dedicated_server' msg recved: "));
+      TSharedRef<TJsonReader<TCHAR>> reader = TJsonReaderFactory<TCHAR>::Create(FString(json_string.c_str()));
+      TSharedPtr<FJsonObject> json_object = MakeShareable(new FJsonObject);
+      FJsonSerializer::Deserialize(reader, json_object);
+
+      UE_LOG(LogTemp, Warning, TEXT("%s"), *FString(json_string.c_str()));
+      
+      TSharedPtr<FJsonObject> redirect_json_object = json_object->GetObjectField(FString("redirect"));
+      if (redirect_json_object.Get() != nullptr)
+      {
+        UE_LOG(LogTemp, Log, TEXT("Getting redirect object succeed."));
+
+        FString host_ip = redirect_json_object->GetStringField(FString("host"));
+        int32 host_port = redirect_json_object->GetIntegerField(FString("port"));
+        FString token = redirect_json_object->GetStringField(FString("token"));
+
+        // test code
+        // host_ip = "127.0.0.1";
+        // host_port = 7777;
+        // token = "8fbac64d60401c6fc0e0ae060e78c7ae";
+        // playerId = "E886895D4324A6F0521BC6A8CA6645C1";
+        // //
+
+        UE_LOG(LogTemp, Log, TEXT("host: %s:%d, token: %s"), *host_ip, host_port, *token);
+        
+        FString host_addr = host_ip;
+        host_addr += FString(":");
+        host_addr += FString::FromInt(host_port);
+        host_addr += FString("?FunapiUID=");
+        host_addr += playerId;
+        host_addr += FString("?FunapiToken=");
+        host_addr += token;
+
+        // //
+        FURL DefaultURL;
+        DefaultURL.LoadURLConfig(TEXT("DefaultPlayer"), GGameIni);
+
+        // FURL URL(&DefaultURL, TEXT("127.0.0.1:7777?FunapiUID=E886895D4324A6F0521BC6A8CA6645C1?FunapiToken=8fbac64d60401c6fc0e0ae060e78c7ae"), TRAVEL_Partial);
+        FURL URL(&DefaultURL, *host_addr, TRAVEL_Partial);
+
+        if (URL.Valid)
+        {
+          UEngine* const Engine = GetEngine();
+
+          FString Error;
+
+          const EBrowseReturnVal::Type BrowseRet = Engine->Browse(*WorldContext, URL, Error);
+
+          if (BrowseRet == EBrowseReturnVal::Success)
+          {
+            // Success, we loaded the map, go directly to playing state
+            GotoState(ShooterGameInstanceState::Playing);
+            return;
+          }
+          else if (BrowseRet == EBrowseReturnVal::Pending)
+          {
+            // Assume network connection
+            LoadFrontEndMap(MainMenuMap);
+            AddNetworkFailureHandlers();
+            ShowLoadingScreen();
+            GotoState(ShooterGameInstanceState::Playing);
+            return;
+          }
+        }
+
+        GotoInitialState();
+        // //
+      }
+      else
+      {
+        UE_LOG(LogTemp, Warning, TEXT("Getting redirect object failed."));
+      }
+    }
+    else
+    {
+      UE_LOG(LogTemp, Warning, TEXT("unavailable msg_type: %s"), *FString(msg_type.c_str()));
+    }
+    
+  });
+
+  // connect
+  session_->Connect(fun::TransportProtocol::kTcp, kPort, fun::FunEncoding::kJson);
+
+  // set tcp as default protocol
+  session_->SetDefaultProtocol(fun::TransportProtocol::kTcp);
+
+  return true;
+#else
+  return false;
+#endif 
 }
 
 FName UShooterGameInstance::GetInitialState()
@@ -1187,6 +1375,12 @@ bool UShooterGameInstance::Tick(float DeltaSeconds)
 	{
 		return true;
 	}
+
+  // Funapi
+#if UE_SERVER == 0
+  fun::FunapiTasks::UpdateAll();
+#endif // PLATFORM_LINUX
+  // // 
 
 	MaybeChangeState();
 

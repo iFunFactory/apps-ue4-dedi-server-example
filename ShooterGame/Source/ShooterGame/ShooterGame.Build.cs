@@ -38,7 +38,8 @@ public class ShooterGame : ModuleRules
 				"ShooterGameLoadingScreen",
 				"Json",
 				"Http",
-				"FunapiDedicatedServer"
+				"FunapiDedicatedServer",
+                "Funapi"
             }
 		);
 

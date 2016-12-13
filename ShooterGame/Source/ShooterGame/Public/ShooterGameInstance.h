@@ -8,6 +8,11 @@
 #include "Engine/GameInstance.h"
 #include "ShooterGameInstance.generated.h"
 
+#if UE_SERVER == 0
+#include "funapi_session.h"
+#include "funapi_tasks.h"
+#endif // UE_SERVER
+
 class FVariantData;
 class FShooterMainMenu;
 class FShooterWelcomeMenu;
@@ -370,6 +375,15 @@ private:
 
 protected:
 	bool HandleOpenCommand(const TCHAR* Cmd, FOutputDevice& Ar, UWorld* InWorld);
+
+#if UE_SERVER == 0
+  private:
+    std::shared_ptr<fun::FunapiSession> session_ = nullptr;
+    FString playerId;
+#endif // UE_SERVER
+
+  private:
+    bool TestFunapiServerConnect();
 };
 
 
