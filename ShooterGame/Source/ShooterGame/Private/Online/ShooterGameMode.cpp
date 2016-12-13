@@ -202,6 +202,8 @@ void AShooterGameMode::FinishMatch()
 
 		// set up to restart the match
 		MyGameState->RemainingTime = TimeBetweenMatches;
+
+		fun::FunapiDedicatedServer::PostResult(FString("{}"), true);
 	}
 }
 
@@ -550,9 +552,6 @@ void AShooterGameMode::RestartGame()
 void AShooterGameMode::Logout(AController* Exiting)
 {
   // UE_LOG(LogTemp, Log, TEXT("Logout"));
-
-  // test code
-  fun::FunapiDedicatedServer::PostResult(FString("{ \"message\":\"result\"}"), false);
   // //
 
   Super::Logout(Exiting);
