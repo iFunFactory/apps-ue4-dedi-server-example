@@ -8,7 +8,7 @@ public class ShooterGameServerTarget : TargetRules
 	public ShooterGameServerTarget(TargetInfo Target)
 	{
 		Type = TargetType.Server;
-		bUsesSteam = true;
+		bUsesSteam = false;
 	}
 
 	//

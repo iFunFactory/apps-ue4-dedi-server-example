@@ -8,10 +8,10 @@
 #include "Engine/GameInstance.h"
 #include "ShooterGameInstance.generated.h"
 
-#if UE_SERVER == 0
+#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
 #include "funapi_session.h"
 #include "funapi_tasks.h"
-#endif // UE_SERVER
+#endif
 
 class FVariantData;
 class FShooterMainMenu;
@@ -371,16 +371,16 @@ private:
 	void HandleControllerPairingChanged(int GameUserIndex, const FUniqueNetId& PreviousUser, const FUniqueNetId& NewUser);
 
 	// Handle confirming the controller disconnected dialog.
-	FReply OnControllerReconnectConfirm();	
+	FReply OnControllerReconnectConfirm();
 
 protected:
 	bool HandleOpenCommand(const TCHAR* Cmd, FOutputDevice& Ar, UWorld* InWorld);
 
-#if UE_SERVER == 0
+#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
   private:
     std::shared_ptr<fun::FunapiSession> session_ = nullptr;
     FString playerId;
-#endif // UE_SERVER
+#endif
 
   private:
     bool TestFunapiServerConnect();

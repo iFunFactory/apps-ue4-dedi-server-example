@@ -350,12 +350,12 @@ void UShooterGameInstance::StartGameInstance()
 
 bool UShooterGameInstance::TestFunapiServerConnect() 
 {
-#if UE_SERVER == 0
+#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
   const FString funapi_server_field = "FunapiServer";
   const FString funapi_server_port_field = "FunapiServerPort";
 
   FString FunapiServer = "harida-vm.ifunfactory.com";
-  FString FunapiServerPort = "8012"; 
+  FString FunapiServerPort = "8012";
 
   if (FParse::Value(FCommandLine::Get(), *funapi_server_field, FunapiServer))
   {
@@ -1376,11 +1376,9 @@ bool UShooterGameInstance::Tick(float DeltaSeconds)
 		return true;
 	}
 
-  // Funapi
-#if UE_SERVER == 0
+#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
   fun::FunapiTasks::UpdateAll();
-#endif // PLATFORM_LINUX
-  // // 
+#endif
 
 	MaybeChangeState();
 

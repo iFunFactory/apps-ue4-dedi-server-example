@@ -8,7 +8,7 @@ public class ShooterGameTarget : TargetRules
     public ShooterGameTarget(TargetInfo Target)
     {
         Type = TargetType.Game;
-        bUsesSteam = true;
+        bUsesSteam = false;
     }
 
     //

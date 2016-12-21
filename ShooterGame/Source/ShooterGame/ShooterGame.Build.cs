@@ -42,7 +42,7 @@ public class ShooterGame : ModuleRules
             }
 		);
 
-		if (Target.Type != TargetRules.TargetType.Server)
+		if (Target.Type != TargetRules.TargetType.Server && Target.Platform != UnrealTargetPlatform.Linux)
 		{
 			PrivateDependencyModuleNames.Add("Funapi");
 		}

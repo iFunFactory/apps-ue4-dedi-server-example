@@ -55,7 +55,8 @@
 		"MacNoEditor",
 		"PS4",
 		"WindowsNoEditor",
-		"XboxOne"
+		"XboxOne",
+		"LinuxNoEditor"
 	],
 	"EpicSampleNameHash": "3868556100"
 }
