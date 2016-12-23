@@ -384,6 +384,7 @@ protected:
 
   private:
     bool TestFunapiServerConnect();
+    void TestRedirect(FString host_addr);
 };
 
 
