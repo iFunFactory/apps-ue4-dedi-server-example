@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterStyle.h"
@@ -22,14 +22,21 @@ static FAutoConsoleVariableRef CVarShooterSplitScreenMax(
 
 void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 {
-#if PLATFORM_XBOXONE
-	PressToPlayText = LOCTEXT("PressToPlay", "Press A to Play");
-	PressToFindText = LOCTEXT("PressToFind", "Press A to Find Match");
-	PressToStartMatchText = LOCTEXT("PressToStart", "Press A To Start Match");	
-#else
+#if PLATFORM_PS4
 	PressToPlayText = LOCTEXT("PressToPlay", "Press cross button to Play");
 	PressToFindText = LOCTEXT("PressToFind", "Press cross button to Find Match");
 	PressToStartMatchText = LOCTEXT("PressToStart", "Press cross button To Start Match");
+#else
+	PressToPlayText = LOCTEXT("PressToPlay", "Press A to Play");
+	PressToFindText = LOCTEXT("PressToFind", "Press A to Find Match");
+	PressToStartMatchText = LOCTEXT("PressToStart", "Press A To Start Match");	
+#endif
+
+#if PLATFORM_SWITCH
+	PressToPlayText = LOCTEXT("PressToPlay", "Press <img src=\"ShooterGame.Switch.Right\"/> to Play");
+	PressToFindText = LOCTEXT("PressToFind", "Press <img src=\"ShooterGame.Switch.Right\"/> to Find Match");
+	PressToStartMatchText = LOCTEXT("PressToStart", "Press <img src=\"ShooterGame.Switch.Right\"/> To Start Match");
+	PressToConnectText = LOCTEXT("PressToConnect", "Press <img src=\"ShooterGame.Switch.Up\"/> To Connect Controllers");
 #endif	
 
 	PlayerOwner = InArgs._PlayerOwner;
@@ -90,19 +97,23 @@ void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 							.HAlign(HAlign_Center)
 							[
 								//first slot needs to have some text to say 'press X to start match'. Only master user can start the match.
-								SAssignNew(UserTextWidgets[0], STextBlock)
+								SAssignNew(UserTextWidgets[0], SRichTextBlock)
 								.TextStyle(FShooterStyle::Get(), "ShooterGame.MenuHeaderTextStyle")
-								.ColorAndOpacity(MenuTitleTextColor)
+//								.ColorAndOpacity(MenuTitleTextColor)
 								.Text(PressToPlayText)														
+								.DecoratorStyleSet(&FShooterStyle::Get())
+								+ SRichTextBlock::ImageDecorator()
 							]
 							+SVerticalBox::Slot()							
 							.Padding(5.0f)
 							.VAlign(VAlign_Bottom)
 							.HAlign(HAlign_Center)					
 							[							
-								SNew(STextBlock)
+								SNew(SRichTextBlock)
 								.TextStyle(FShooterStyle::Get(), "ShooterGame.SplitScreenLobby.StartMatchTextStyle")							
 								.Text(this, &SShooterSplitScreenLobby::GetPlayFindText)
+								.DecoratorStyleSet(&FShooterStyle::Get())
+								+ SRichTextBlock::ImageDecorator()
 							]
 						]					
 					]
@@ -114,6 +125,39 @@ void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 					.HeightOverride(SlotHeight)
 					.WidthOverride(SlotWidth)
 					[
+#if PLATFORM_SWITCH
+						SNew(SBorder)
+						.Padding(0.0f)						
+						.BorderImage(SlotBrush)
+						.BorderBackgroundColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f))
+						[
+							SNew(SVerticalBox)
+							+SVerticalBox::Slot()												
+							.Padding(0.0f)
+							.VAlign(VAlign_Bottom)
+							.HAlign(HAlign_Center)
+							[
+								//first slot needs to have some text to say 'press X to start match'. Only master user can start the match.
+								SAssignNew(UserTextWidgets[1], SRichTextBlock)
+								.TextStyle(FShooterStyle::Get(), "ShooterGame.MenuHeaderTextStyle")
+								//.ColorAndOpacity(MenuTitleTextColor)
+								.Text(PressToPlayText)														
+								.DecoratorStyleSet(&FShooterStyle::Get())
+								+ SRichTextBlock::ImageDecorator()
+							]
+							+SVerticalBox::Slot()							
+							.Padding(5.0f)
+							.VAlign(VAlign_Bottom)
+							.HAlign(HAlign_Center)					
+							[							
+								SNew(SRichTextBlock)
+								.TextStyle(FShooterStyle::Get(), "ShooterGame.SplitScreenLobby.StartMatchTextStyle")							
+								.Text(PressToConnectText)
+								.DecoratorStyleSet(&FShooterStyle::Get())
+								+ SRichTextBlock::ImageDecorator()
+							]
+						]	
+#else
 						SNew(SBorder)
 						.Padding(0.0f)
 						.VAlign(VAlign_Center)
@@ -121,11 +165,14 @@ void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 						.BorderImage(SlotBrush)
 						.BorderBackgroundColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f))
 						[
-							SAssignNew(UserTextWidgets[1], STextBlock)
+							SAssignNew(UserTextWidgets[1], SRichTextBlock)
 							.TextStyle(FShooterStyle::Get(), "ShooterGame.MenuHeaderTextStyle")
-							.ColorAndOpacity(MenuTitleTextColor)
+							//.ColorAndOpacity(MenuTitleTextColor)
 							.Text(PressToPlayText)
+							.DecoratorStyleSet(&FShooterStyle::Get())
+							+ SRichTextBlock::ImageDecorator()
 						]
+#endif
 					]
 				]
 			]
@@ -150,10 +197,12 @@ void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 						.BorderImage(SlotBrush)
 						.BorderBackgroundColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f))
 						[
-							SAssignNew(UserTextWidgets[2], STextBlock)
+							SAssignNew(UserTextWidgets[2], SRichTextBlock)
 							.TextStyle(FShooterStyle::Get(), "ShooterGame.MenuHeaderTextStyle")
-							.ColorAndOpacity(MenuTitleTextColor)
+							//.ColorAndOpacity(MenuTitleTextColor)
 							.Text(PressToPlayText)
+							.DecoratorStyleSet(&FShooterStyle::Get())
+							+ SRichTextBlock::ImageDecorator()
 						]
 					]
 				]
@@ -172,10 +221,12 @@ void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 						.BorderImage(SlotBrush)
 						.BorderBackgroundColor(FLinearColor(1.0f, 1.0f, 1.0f, 1.0f))
 						[
-							SAssignNew(UserTextWidgets[3], STextBlock)
+							SAssignNew(UserTextWidgets[3], SRichTextBlock)
 							.TextStyle(FShooterStyle::Get(), "ShooterGame.MenuHeaderTextStyle")
-							.ColorAndOpacity(MenuTitleTextColor)
+							//.ColorAndOpacity(MenuTitleTextColor)
 							.Text(PressToPlayText)
+							.DecoratorStyleSet(&FShooterStyle::Get())
+							+ SRichTextBlock::ImageDecorator()
 						]
 					]
 				]	
@@ -223,7 +274,7 @@ void SShooterSplitScreenLobby::UpdateSlots()
 
 		if ( LocalPlayer != NULL )
 		{
-			UserTextWidgets[i]->SetText( LocalPlayer->GetNickname() );
+			UserTextWidgets[i]->SetText( FText::FromString(LocalPlayer->GetNickname()) );
 		}
 		else
 		{ 
@@ -266,7 +317,12 @@ void SShooterSplitScreenLobby::ConditionallyReadyPlayer( const int ControllerId,
 	// If this is an online game, reject and show sign-in if:
 	//	1. We have already registered this FUniqueNetId
 	//	2. This player is not currently signed in and online
-	if ( bIsOnline && ( bFoundExistingPlayer || !bIsPlayerOnline ) )
+	// on Swtich, always show the login UI even if a Lan match
+	if (
+#if !PLATFORM_SWITCH
+		bIsOnline &&
+#endif
+		( bFoundExistingPlayer || !bIsPlayerOnline ) )
 	{
 		const auto ExternalUI = Online::GetExternalUIInterface();
 
@@ -445,7 +501,7 @@ FReply SShooterSplitScreenLobby::OnKeyDown(const FGeometry& MyGeometry, const FK
 
 	ULocalPlayer * ExistingPlayer = GEngine->GetLocalPlayerFromControllerId(GetGameInstance()->GetGameViewportClient(), UserIndex);
 
-	if ((Key == EKeys::Enter || Key == EKeys::Gamepad_FaceButton_Bottom) && !InKeyEvent.IsRepeat())
+	if ((Key == EKeys::Enter || Key == EKeys::Virtual_Accept) && !InKeyEvent.IsRepeat())
 	{
 		// See if we are already tracking this user
 		if ( ExistingPlayer != NULL )
@@ -487,7 +543,13 @@ FReply SShooterSplitScreenLobby::OnKeyDown(const FGeometry& MyGeometry, const FK
 
 		return FReply::Handled();
 	}
-	else if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::Global_Back)
+#if PLATFORM_SWITCH
+	else if ((Key == EKeys::Gamepad_FaceButton_Top) && !InKeyEvent.IsRepeat())
+	{
+		GEngine->DeferredCommands.Add(TEXT("Npad.ConnectUI"));
+	}
+#endif
+	else if (Key == EKeys::Escape || Key == EKeys::Virtual_Back || Key == EKeys::Global_Back)
 	{
 		if ( ExistingPlayer != NULL && ExistingPlayer == GetGameInstance()->GetFirstGamePlayer() )
 		{
@@ -504,7 +566,13 @@ FReply SShooterSplitScreenLobby::OnKeyDown(const FGeometry& MyGeometry, const FK
 
 FReply SShooterSplitScreenLobby::OnFocusReceived(const FGeometry& MyGeometry, const FFocusEvent& InFocusEvent)
 {
-	return FReply::Handled().ReleaseMouseCapture().SetUserFocus(SharedThis( this ), EFocusCause::SetDirectly, true);
+	// focus all possible users
+	for (int Index = 0; Index < GShooterSplitScreenMax; Index++)
+	{
+		FSlateApplication::Get().SetUserFocus(Index, SharedThis(this), EFocusCause::SetDirectly);
+	}
+	return FReply::Handled().ReleaseMouseCapture();
+
 }
 
 void SShooterSplitScreenLobby::OnFocusLost( const FFocusEvent& InFocusEvent )

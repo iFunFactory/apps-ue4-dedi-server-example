@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -220,8 +220,10 @@ protected:
 	/** after all game elements are created */
 	virtual void PostInitializeComponents() override;
 
+protected:
 	virtual void BeginPlay() override;
 
+public:
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;
 	//End AActor interface
 

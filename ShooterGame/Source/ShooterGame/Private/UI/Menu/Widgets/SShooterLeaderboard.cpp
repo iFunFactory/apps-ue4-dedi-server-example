@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "SShooterLeaderboard.h"
@@ -7,6 +7,8 @@
 
 #if PLATFORM_XBOXONE
 #define INTERACTIVE_LEADERBOARD	1
+#else
+#define INTERACTIVE_LEADERBOARD	0
 #endif
 
 FLeaderboardRow::FLeaderboardRow(const FOnlineStatsRow& Row)
@@ -205,7 +207,7 @@ FReply SShooterLeaderboard::OnKeyDown(const FGeometry& MyGeometry, const FKeyEve
 		MoveSelection(1);
 		Result = FReply::Handled();
 	}
-	else if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::Gamepad_Special_Left)
+	else if (Key == EKeys::Escape || Key == EKeys::Virtual_Back || Key == EKeys::Gamepad_Special_Left)
 	{
 		if (bReadingStats)
 		{
@@ -213,7 +215,7 @@ FReply SShooterLeaderboard::OnKeyDown(const FGeometry& MyGeometry, const FKeyEve
 			bReadingStats = false;
 		}
 	}
-	else if (Key == EKeys::Enter || Key == EKeys::Gamepad_FaceButton_Bottom)
+	else if (Key == EKeys::Enter || Key == EKeys::Virtual_Accept)
 	{
 		// Open the profile UI of the selected item
 		ProfileUIOpened();

@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterStyle.h"
@@ -131,11 +131,11 @@ FReply SShooterConfirmationDialog::OnKeyDown(const FGeometry& MyGeometry, const 
 	}
 
 	// For testing on PC
-	if ((Key == EKeys::Enter || Key == EKeys::Gamepad_FaceButton_Bottom) && !KeyEvent.IsRepeat())
+	if ((Key == EKeys::Enter || Key == EKeys::Virtual_Accept) && !KeyEvent.IsRepeat())
 	{
 		return ExecuteConfirm(UserIndex);
 	}
-	else if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right)
+	else if (Key == EKeys::Escape || Key == EKeys::Virtual_Back)
 	{
 		if(OnCancel.IsBound())
 		{

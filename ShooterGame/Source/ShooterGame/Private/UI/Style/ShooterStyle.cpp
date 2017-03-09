@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterStyle.h"
@@ -110,6 +110,22 @@ TSharedRef< FSlateStyleSet > FShooterStyle::Create()
 		.SetFont(TTF_FONT("Fonts/Roboto-Black", 12))
 		.SetColorAndOpacity(FLinearColor::White)
 		.SetShadowOffset(FIntPoint(-1,1))
+		);
+
+	Style.Set("ShooterGame.Switch.Left", FInlineTextImageStyle()
+		.SetImage(IMAGE_BRUSH("Images/SwitchButtonLeft", FVector2D(32, 32)))
+		);
+
+	Style.Set("ShooterGame.Switch.Right", FInlineTextImageStyle()
+		.SetImage(IMAGE_BRUSH("Images/SwitchButtonRight", FVector2D(32, 32)))
+		);
+
+	Style.Set("ShooterGame.Switch.Up", FInlineTextImageStyle()
+		.SetImage(IMAGE_BRUSH("Images/SwitchButtonUp", FVector2D(32, 32)))
+		);
+
+	Style.Set("ShooterGame.Switch.Down", FInlineTextImageStyle()
+		.SetImage(IMAGE_BRUSH("Images/SwitchButtonDown", FVector2D(32, 32)))
 		);
 
 	return StyleRef;

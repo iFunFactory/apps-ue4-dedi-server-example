@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -137,6 +137,9 @@ protected:
 
 	/** get player name */
 	FText GetPlayerName(const FTeamPlayer TeamPlayer) const;
+
+	/** get whether or not the player should be displayed on the scoreboard */
+	bool ShouldPlayerBeDisplayed(const FTeamPlayer TeamPlayer) const;
 
 	/** get player color */
 	FSlateColor GetPlayerColor(const FTeamPlayer TeamPlayer) const;

@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "SShooterServerList.h"
@@ -318,7 +318,7 @@ FReply SShooterServerList::OnKeyDown(const FGeometry& MyGeometry, const FKeyEven
 		MoveSelection(1);
 		Result = FReply::Handled();
 	}
-	else if (Key == EKeys::Enter || Key == EKeys::Gamepad_FaceButton_Bottom)
+	else if (Key == EKeys::Enter || Key == EKeys::Virtual_Accept)
 	{
 		ConnectToServer();
 		Result = FReply::Handled();

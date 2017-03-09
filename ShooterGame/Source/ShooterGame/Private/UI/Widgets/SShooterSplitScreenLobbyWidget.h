@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #pragma once
 
@@ -67,7 +67,7 @@ private:
 	FOnClicked MasterUserBack;
 	FOnClicked MasterUserPlay;
 	
-	TSharedPtr<STextBlock> UserTextWidgets[MAX_POSSIBLE_SLOTS];
+	TSharedPtr<SRichTextBlock> UserTextWidgets[MAX_POSSIBLE_SLOTS];
 	TSharedPtr<SWidget> UserSlots[MAX_POSSIBLE_SLOTS];
 
 	/** used for holding on to the splitscreen lobby widget so we can switch back to that UI after the LoginFailure UI pops up */
@@ -76,6 +76,9 @@ private:
 	FText PressToPlayText;
 	FText PressToFindText;
 	FText PressToStartMatchText;
+#if PLATFORM_SWITCH
+	FText PressToConnectText;
+#endif
 
 	int PendingControllerId;
 

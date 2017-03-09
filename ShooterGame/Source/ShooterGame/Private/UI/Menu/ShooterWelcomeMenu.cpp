@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterWelcomeMenu.h"
@@ -58,14 +58,18 @@ class SShooterWelcomeMenuWidget : public SCompoundWidget
 			.VAlign(VAlign_Center)
 			.HAlign(HAlign_Center)
 			[ 
-				SNew( STextBlock )
+				SNew( SRichTextBlock )
 #if PLATFORM_PS4
 				.Text( LOCTEXT("PressStartPS4", "PRESS CROSS BUTTON TO PLAY" ) )
+#elif PLATFORM_SWITCH
+				.Text(LOCTEXT("PressStartSwitch", "PRESS <img src=\"ShooterGame.Switch.Right\"/> TO PLAY"))
 #else
 				.Text( LOCTEXT("PressStartXboxOne", "PRESS A TO PLAY" ) )
 #endif
-				.ColorAndOpacity(this, &SShooterWelcomeMenuWidget::GetTextColor)
+//				.ColorAndOpacity(this, &SShooterWelcomeMenuWidget::GetTextColor)
 				.TextStyle( FShooterStyle::Get(), "ShooterGame.WelcomeScreen.WelcomeTextStyle" )
+				.DecoratorStyleSet(&FShooterStyle::Get())
+				+ SRichTextBlock::ImageDecorator()
 			]
 		];
 	}
@@ -97,7 +101,7 @@ class SShooterWelcomeMenuWidget : public SCompoundWidget
 		{
 			MenuOwner->HandleLoginUIClosed(TSharedPtr<const FUniqueNetId>(), 0);
 		}
-		else if (!MenuOwner->GetControlsLocked() && Key == EKeys::Gamepad_FaceButton_Bottom)
+		else if (!MenuOwner->GetControlsLocked() && Key == EKeys::Virtual_Accept)
 		{
 			bool bSkipToMainMenu = true;
 

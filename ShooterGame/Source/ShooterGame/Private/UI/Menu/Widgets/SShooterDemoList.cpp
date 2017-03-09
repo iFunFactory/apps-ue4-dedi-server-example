@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "SShooterDemoList.h"
@@ -349,7 +349,7 @@ FReply SShooterDemoList::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent&
 
 	FReply Result = FReply::Unhandled();
 	const FKey Key = InKeyboardEvent.GetKey();
-	if (Key == EKeys::Enter || Key == EKeys::Gamepad_FaceButton_Bottom)
+	if (Key == EKeys::Enter || Key == EKeys::Virtual_Accept)
 	{
 		PlayDemo();
 		Result = FReply::Handled();

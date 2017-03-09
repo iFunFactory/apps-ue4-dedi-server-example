@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "UI/ShooterHUD.h"
@@ -9,6 +9,7 @@
 #include "Weapons/ShooterDamageType.h"
 #include "Weapons/ShooterWeapon_Instant.h"
 #include "Online/ShooterPlayerState.h"
+#include "Misc/NetworkVersion.h"
 
 
 #define LOCTEXT_NAMESPACE "ShooterGame.HUD.Menu"

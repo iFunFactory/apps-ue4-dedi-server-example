@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "Engine/Console.h"
@@ -16,6 +16,8 @@
 
 #if PLATFORM_XBOXONE
 #define PROFILE_SWAPPING	1
+#else
+#define PROFILE_SWAPPING	0
 #endif
 
 void SShooterMenuWidget::Construct(const FArguments& InArgs)
@@ -904,13 +906,13 @@ FReply SShooterMenuWidget::OnKeyDown(const FGeometry& MyGeometry, const FKeyEven
 			ConfirmMenuItem();
 			Result = FReply::Handled();
 		}
-		else if (Key == EKeys::Gamepad_FaceButton_Bottom && !InKeyEvent.IsRepeat())
+		else if (Key == EKeys::Virtual_Accept && !InKeyEvent.IsRepeat())
 		{
 			ControllerFacebuttonDownPressed();
 			ConfirmMenuItem();
 			Result = FReply::Handled();
 		}
-		else if ((Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::Gamepad_Special_Left || Key == EKeys::Global_Back || Key == EKeys::Global_View) && !InKeyEvent.IsRepeat())
+		else if ((Key == EKeys::Escape || Key == EKeys::Virtual_Back || Key == EKeys::Gamepad_Special_Left || Key == EKeys::Global_Back || Key == EKeys::Global_View) && !InKeyEvent.IsRepeat())
 		{
 			MenuGoBack();
 			Result = FReply::Handled();

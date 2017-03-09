@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "SShooterScoreboardWidget.h"
@@ -12,6 +12,8 @@
 // @todo: prevent interaction on PC for now (see OnFocusReceived for reasons)
 #if PLATFORM_XBOXONE
 #define INTERACTIVE_SCOREBOARD	1
+#else
+#define INTERACTIVE_SCOREBOARD	0
 #endif
 
 #define	NORM_PADDING	(FMargin(5))
@@ -338,7 +340,7 @@ FReply SShooterScoreboardWidget::OnKeyDown(const FGeometry& MyGeometry, const FK
 			OnSelectedPlayerNext();
 			Result = FReply::Handled();
 		}
-		else if (Key == EKeys::Enter || Key == EKeys::Gamepad_FaceButton_Bottom)
+		else if (Key == EKeys::Enter || Key == EKeys::Virtual_Accept)
 		{
 			ProfileUIOpened();
 			Result = FReply::Handled();
@@ -609,6 +611,13 @@ FText SShooterScoreboardWidget::GetPlayerName(const FTeamPlayer TeamPlayer) cons
 	return FText::GetEmpty();
 }
 
+bool SShooterScoreboardWidget::ShouldPlayerBeDisplayed(const FTeamPlayer TeamPlayer) const
+{
+	const AShooterPlayerState* PlayerState = GetSortedPlayerState(TeamPlayer);
+	
+	return PlayerState != nullptr && !PlayerState->bOnlySpectator;
+}
+
 FSlateColor SShooterScoreboardWidget::GetPlayerColor(const FTeamPlayer TeamPlayer) const
 {
 	// If this is the owner players row, tint the text color to show ourselves more clearly
@@ -745,10 +754,15 @@ TSharedRef<SWidget> SShooterScoreboardWidget::MakePlayerRows(uint8 TeamNum) cons
 
 	for (int32 PlayerIndex=0; PlayerIndex < PlayerStateMaps[TeamNum].Num(); PlayerIndex++ )
 	{
-		PlayerRows->AddSlot() .AutoHeight()
-		[
-			MakePlayerRow(FTeamPlayer(TeamNum, PlayerIndex))
-		];
+		FTeamPlayer TeamPlayer(TeamNum, PlayerIndex);
+
+		if (ShouldPlayerBeDisplayed(TeamPlayer))
+		{
+			PlayerRows->AddSlot().AutoHeight()
+				[
+					MakePlayerRow(TeamPlayer)
+				];
+		}
 	}
 
 	return PlayerRows;

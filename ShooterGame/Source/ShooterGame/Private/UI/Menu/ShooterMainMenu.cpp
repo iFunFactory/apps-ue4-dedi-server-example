@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterMainMenu.h"
@@ -10,6 +10,7 @@
 #include "SlateExtras.h"
 #include "GenericPlatformChunkInstall.h"
 #include "Online/ShooterOnlineGameSettings.h"
+#include "OnlineSubsystemSessionSettings.h"
 #include "SShooterConfirmationDialog.h"
 #include "ShooterMenuItemWidgetStyle.h"
 #include "ShooterGameUserSettings.h"

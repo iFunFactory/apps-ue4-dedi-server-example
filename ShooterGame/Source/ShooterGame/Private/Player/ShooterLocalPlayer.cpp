@@ -1,4 +1,4 @@
-// Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "Player/ShooterLocalPlayer.h"
@@ -26,8 +26,8 @@ void UShooterLocalPlayer::LoadPersistentUser()
 {
 	FString SaveGameName = GetNickname();
 
-#if PLATFORM_WOLF
-	// on Wolf, the displayable nickname can change, so we can't use it as a save ID (explicitly stated in docs, so changing for pre-cert)
+#if PLATFORM_SWITCH
+	// on Switch, the displayable nickname can change, so we can't use it as a save ID (explicitly stated in docs, so changing for pre-cert)
 	FPlatformMisc::GetUniqueStringNameForControllerId(GetControllerId(), SaveGameName);
 #endif
 
@@ -57,8 +57,8 @@ void UShooterLocalPlayer::SetControllerId(int32 NewControllerId)
 {
 	FString SaveGameName = GetNickname();
 
-#if PLATFORM_WOLF
-	// on Wolf, the displayable nickname can change, so we can't use it as a save ID (explicitly stated in docs, so changing for pre-cert)
+#if PLATFORM_SWITCH
+	// on Switch, the displayable nickname can change, so we can't use it as a save ID (explicitly stated in docs, so changing for pre-cert)
 	FPlatformMisc::GetUniqueStringNameForControllerId(GetControllerId(), SaveGameName);
 #endif
 
