@@ -21,7 +21,7 @@ Epic Games 에서 제공하는 [ShooterGame](https://docs.unrealengine.com/lates
 
 ### 데디케이트 서버
 ```
-"C:\Program Files\Epic Games\4.14\Engine\Binaries\Win64\UE4Editor.exe" "C:\work\apps-ue4-dedi-server-example\ShooterGame\ShooterGame.uproject" HighRise?game=FFA -skipcompile -server -log -port=7777 -FunapiMatchID="53d88031-cd49-432e-826a-a5ff6b277250" -FunapiManagerServer="http://harida-vm.ifunfactory.com:8000"
+"C:\Program Files\Epic Games\UE_4.15\Engine\Binaries\Win64\UE4Editor.exe" "C:\work\apps-ue4-dedi-server-example\ShooterGame\ShooterGame.uproject" HighRise?game=FFA -skipcompile -server -log -port=7777 -BeaconPort=15000 -FunapiMatchID="53d88031-cd49-432e-826a-a5ff6b277250" -FunapiManagerServer="http://harida-vm.ifunfactory.com:8000"
 ```
 - **FunapiMatchID**
     - 매치 아이디
