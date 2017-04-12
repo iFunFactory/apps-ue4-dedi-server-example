@@ -21,12 +21,14 @@ Epic Games 에서 제공하는 [ShooterGame](https://docs.unrealengine.com/lates
 
 ### 데디케이트 서버
 ```
-"C:\Program Files\Epic Games\UE_4.15\Engine\Binaries\Win64\UE4Editor.exe" "C:\work\apps-ue4-dedi-server-example\ShooterGame\ShooterGame.uproject" HighRise?game=FFA -skipcompile -server -log -port=7777 -BeaconPort=15000 -FunapiMatchID="53d88031-cd49-432e-826a-a5ff6b277250" -FunapiManagerServer="http://harida-vm.ifunfactory.com:8000"
+"C:\Program Files\Epic Games\UE_4.15\Engine\Binaries\Win64\UE4Editor.exe" "C:\work\apps-ue4-dedi-server-example\ShooterGame\ShooterGame.uproject" HighRise?game=FFA -skipcompile -server -log -port=7777 -BeaconPort=15000 -FunapiMatchID="53d88031-cd49-432e-826a-a5ff6b277250" -FunapiManagerServer="http://harida-vm.ifunfactory.com:8000" -FunapiHeartbeat=10
 ```
 - **FunapiMatchID**
     - 매치 아이디
 - **FunapiManagerServer**
     - 데디케이티드 서버 매니저 주소
+- **FunapiHeartbeat**
+    - Heartbeat HTTP POST 를 보내는 주기(초), 0 이거나 없으면 보내지 않습니다
 
 ### 게임 클라이언트
 ```
@@ -92,9 +94,11 @@ if (Target.Type != TargetRules.TargetType.Server && Target.Platform != UnrealTar
 
 ```c++
 bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field);
+bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field, const FString &heartbeat_field);
 
 fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get());
 fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get(), "FunapiMatchID", "FunapiManagerServer");
+fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get(), "FunapiMatchID", "FunapiManagerServer", "FunapiHeartbeat");
 ```
 
 엔진 기본 커맨드 라인이 앞으로 바뀔 수 있기 때문에 고정된 이름을 사용하지 않고 파라미터를 받도록 합니다.
