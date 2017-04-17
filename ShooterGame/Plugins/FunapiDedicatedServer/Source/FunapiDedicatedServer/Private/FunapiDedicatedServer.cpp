@@ -295,5 +295,32 @@ namespace fun
       return ret;
     }
 
+    void PostGameState(const FString &json_string)
+    {
+      if (funapi_manager_server_.IsEmpty()) {
+        return;
+      }
+
+      FString server_url = funapi_manager_server_ + "state";
+
+      auto http_request = FHttpModule::Get().CreateRequest();
+      http_request->SetURL(server_url);
+      http_request->SetVerb(FString("POST"));
+      http_request->SetHeader(FString("Content-Type"), FString("application/json; charset=utf-8"));
+      http_request->SetHeader(FString("Content-Length"), FString::FromInt(json_string.Len()));
+      http_request->SetContentAsString(json_string);
+
+      http_request->OnProcessRequestComplete().BindLambda(
+        [](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed) {
+        if (!succeed) {
+          UE_LOG(LogFunapiDedicatedServer, Error, TEXT("State : Response was invalid!"));
+        } else {
+          FString json_fstring = response->GetContentAsString();
+          UE_LOG(LogFunapiDedicatedServer, Log, TEXT("State : Response = %s"), *json_fstring);
+        }
+      });
+      http_request->ProcessRequest();
+    }
+
   }
 }

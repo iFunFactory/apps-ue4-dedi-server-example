@@ -17,5 +17,6 @@ namespace fun {
     extern FUNAPIDEDICATEDSERVER_API void PostHeartbeat();
     extern FUNAPIDEDICATEDSERVER_API bool AuthUser(const FString& options, const FString& uid_field, const FString& token_field, FString &error_message);
     extern FUNAPIDEDICATEDSERVER_API bool AuthUser(const FString& options, FString &error_message);
+    extern FUNAPIDEDICATEDSERVER_API void PostGameState(const FString &json_string);
   }
 }
