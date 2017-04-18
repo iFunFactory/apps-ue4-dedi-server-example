@@ -158,40 +158,13 @@ namespace fun
       http_request->ProcessRequest();
     }
 
-    void PostReady()
+    void Post(const FString &path, const FString &json_string, const TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> &completion_handler)
     {
       if (funapi_manager_server_.IsEmpty()) {
         return;
       }
 
-      FString server_url = funapi_manager_server_ + "ready";
-
-      auto http_request = FHttpModule::Get().CreateRequest();
-      http_request->SetURL(server_url);
-      http_request->SetVerb(FString("POST"));
-      http_request->SetHeader(FString("Content-Type"), FString("application/json; charset=utf-8"));
-
-      http_request->OnProcessRequestComplete().BindLambda(
-        [](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed) {
-        if (!succeed) {
-          UE_LOG(LogFunapiDedicatedServer, Error, TEXT("Ready : Response was invalid!"));
-        }
-        else {
-          FString json_fstring = response->GetContentAsString();
-          UE_LOG(LogFunapiDedicatedServer, Log, TEXT("Ready : Response = %s"), *json_fstring);
-        }
-      });
-
-      http_request->ProcessRequest();
-    }
-
-    void PostResult(const FString &json_string, const bool use_exit)
-    {
-      if (funapi_manager_server_.IsEmpty()) {
-        return;
-      }
-
-      FString server_url = funapi_manager_server_ + "result";
+      FString server_url = funapi_manager_server_ + path;
 
       auto http_request = FHttpModule::Get().CreateRequest();
       http_request->SetURL(server_url);
@@ -201,49 +174,43 @@ namespace fun
       http_request->SetContentAsString(json_string);
 
       http_request->OnProcessRequestComplete().BindLambda(
-        [use_exit](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed) {
+        [path, completion_handler](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed) {
         if (!succeed) {
-          UE_LOG(LogFunapiDedicatedServer, Error, TEXT("Result : Response was invalid!"));
+          UE_LOG(LogFunapiDedicatedServer, Error, TEXT("%s : Response was invalid!"), *path);
         }
         else {
           FString json_fstring = response->GetContentAsString();
-          UE_LOG(LogFunapiDedicatedServer, Log, TEXT("Result : Response = %s"), *json_fstring);
-
-          // exit
-          if (use_exit) {
-            FGenericPlatformMisc::RequestExit(false);
-          }
+          UE_LOG(LogFunapiDedicatedServer, Log, TEXT("%s : Response = %s"), *path, *json_fstring);
         }
+
+        completion_handler(request, response, succeed);
       });
+
       http_request->ProcessRequest();
     }
 
+    void PostReady()
+    {
+      Post("ready");
+    }
+
+    void PostResult(const FString &json_string, const bool use_exit)
+    {
+      Post("result", json_string,
+        [use_exit](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)
+      {
+        if (succeed && use_exit) {
+          FGenericPlatformMisc::RequestExit(false);
+        }
+      });
+    }
+
     void PostHeartbeat() {
-      if (funapi_manager_server_.IsEmpty()) {
-        return;
-      }
-
-      FString server_url = funapi_manager_server_ + "heartbeat";
-
-      auto http_request = FHttpModule::Get().CreateRequest();
-      http_request->SetURL(server_url);
-      http_request->SetVerb(FString("POST"));
-      http_request->SetHeader(FString("Content-Type"), FString("application/json; charset=utf-8"));
-
-      http_request->OnProcessRequestComplete().BindLambda(
-        [](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed) {
-        if (!succeed) {
-          UE_LOG(LogFunapiDedicatedServer, Error, TEXT("Heartbeat : Response was invalid!"));
-        }
-        else {
-          FString json_fstring = response->GetContentAsString();
-          UE_LOG(LogFunapiDedicatedServer, Log, TEXT("Heartbeat : Response = %s"), *json_fstring);
-        }
-
+      Post("heartbeat", "",
+        [](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)
+      {
         AsyncHeartbeat();
       });
-
-      http_request->ProcessRequest();
     }
 
     bool AuthUser(const FString& options, FString &error_message)
@@ -297,29 +264,7 @@ namespace fun
 
     void PostGameState(const FString &json_string)
     {
-      if (funapi_manager_server_.IsEmpty()) {
-        return;
-      }
-
-      FString server_url = funapi_manager_server_ + "state";
-
-      auto http_request = FHttpModule::Get().CreateRequest();
-      http_request->SetURL(server_url);
-      http_request->SetVerb(FString("POST"));
-      http_request->SetHeader(FString("Content-Type"), FString("application/json; charset=utf-8"));
-      http_request->SetHeader(FString("Content-Length"), FString::FromInt(json_string.Len()));
-      http_request->SetContentAsString(json_string);
-
-      http_request->OnProcessRequestComplete().BindLambda(
-        [](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed) {
-        if (!succeed) {
-          UE_LOG(LogFunapiDedicatedServer, Error, TEXT("State : Response was invalid!"));
-        } else {
-          FString json_fstring = response->GetContentAsString();
-          UE_LOG(LogFunapiDedicatedServer, Log, TEXT("State : Response = %s"), *json_fstring);
-        }
-      });
-      http_request->ProcessRequest();
+      Post("state", json_string);
     }
 
   }

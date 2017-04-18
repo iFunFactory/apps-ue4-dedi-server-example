@@ -12,6 +12,8 @@ namespace fun {
     extern FUNAPIDEDICATEDSERVER_API bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field);
     extern FUNAPIDEDICATEDSERVER_API bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field, const FString &heartbeat_field);
     extern FUNAPIDEDICATEDSERVER_API void GetGameInfo(const TFunction<void(FHttpResponsePtr response)> &completion_handler);
+    extern FUNAPIDEDICATEDSERVER_API void Post(const FString &path, const FString &json_string = "", 
+      const TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> &completion_handler = [](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed) {});
     extern FUNAPIDEDICATEDSERVER_API void PostReady();
     extern FUNAPIDEDICATEDSERVER_API void PostResult(const FString &json_string, const bool use_exit);
     extern FUNAPIDEDICATEDSERVER_API void PostHeartbeat();
