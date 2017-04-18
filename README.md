@@ -3,6 +3,9 @@ ShooterGame
 
 Epic Games 에서 제공하는 [ShooterGame](https://docs.unrealengine.com/latest/INT/Resources/SampleGames/ShooterGame/index.html) 샘플 게임 기반으로 데디케이트 서버 연동 예를 보여주는 프로젝트입니다.
 
+## 주의 사항
+github 의 용량 제한 문제로 Content 폴더가 빠져있습니다. 예제 실행을 위해서는 **에픽 게임즈 런처**에서 슈터 게임 예제를 다운 받으신 후 Content 폴더를 복사하셔야 합니다
+
 ## 아이펀 엔진 서버 설정
 [http://www.ifunfactory.com/engine/documents/reference/ko/dedicated-server.html](http://www.ifunfactory.com/engine/documents/reference/ko/dedicated-server.html)
 
