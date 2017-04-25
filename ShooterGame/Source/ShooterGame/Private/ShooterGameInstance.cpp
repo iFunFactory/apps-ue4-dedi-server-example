@@ -284,8 +284,10 @@ void UShooterGameInstance::HandleDemoPlaybackFailure( EDemoPlayFailure::Type Fai
 
 void UShooterGameInstance::StartGameInstance()
 {
-  TFunction<void(FHttpResponsePtr response)> func = [this](FHttpResponsePtr response) {
-    if (response.IsValid()) {
+  TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> func =
+    [this](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)
+  {
+    if (succeed) {
       FString json_fstring = response->GetContentAsString();
       UE_LOG(LogTemp, Log, TEXT("Config JSON string = %s"), *json_fstring);
     }
@@ -343,14 +345,14 @@ void UShooterGameInstance::StartGameInstance()
   }
   else {
     if (TestFunapiServerConnect() == false) {
-      func(nullptr);
+      func(nullptr, nullptr, false);
     }    
   }
 }
 
 bool UShooterGameInstance::TestFunapiServerConnect() 
 {
-#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
+#if WITH_FUNAPI
   const FString funapi_server_field = "FunapiServer";
   const FString funapi_server_port_field = "FunapiServerPort";
 
@@ -1421,13 +1423,17 @@ void UShooterGameInstance::OnSearchSessionsComplete(bool bWasSuccessful)
 
 bool UShooterGameInstance::Tick(float DeltaSeconds)
 {
+  // JHP // TEST
+  // UE_LOG(LogTemp, Log, TEXT("%s"), ANSI_TO_TCHAR(__FUNCTION__));
+  // JHP // TEST
+
 	// Dedicated server doesn't need to worry about game state
 	if (IsRunningDedicatedServer() == true)
 	{
 		return true;
 	}
 
-#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
+#if WITH_FUNAPI
   fun::FunapiTasks::UpdateAll();
 #endif
 

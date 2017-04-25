@@ -6,6 +6,8 @@ namespace UnrealBuildTool.Rules
 	{
 		public FunapiDedicatedServer(TargetInfo Target)
 		{
+            Definitions.Add("WITH_FUNAPIDEDICATEDSERVER=1");
+
             PublicIncludePaths.AddRange(
 				new string[] {
 					// ... add public include paths required here ...

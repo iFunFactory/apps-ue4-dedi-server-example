@@ -8,7 +8,7 @@
 #include "Engine/GameInstance.h"
 #include "ShooterGameInstance.generated.h"
 
-#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
+#if WITH_FUNAPI
 #include "funapi_session.h"
 #include "funapi_tasks.h"
 #endif
@@ -376,7 +376,7 @@ private:
 protected:
 	bool HandleOpenCommand(const TCHAR* Cmd, FOutputDevice& Ar, UWorld* InWorld);
 
-#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
+#if WITH_FUNAPI
   private:
     std::shared_ptr<fun::FunapiSession> session_ = nullptr;
     FString playerId;

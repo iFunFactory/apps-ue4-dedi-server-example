@@ -87,7 +87,7 @@ if (Target.Type != TargetRules.TargetType.Server && Target.Platform != UnrealTar
 게임 클라이언트에서 ``Funapi`` 플러그인을 사용하는 코드에는 전처리기 지시문을 사용해서 빌드에 포함되지 않도록 해야 합니다.
 
 ```c++
-#if (UE_SERVER == 0 && PLATFORM_LINUX == 0)
+#if WITH_FUNAPI
 #include "funapi_session.h"
 #include "funapi_tasks.h"
 #endif
@@ -171,6 +171,14 @@ fun::FunapiDedicatedServer::PostResult(FString("{ \"message\":\"result\"}"), fal
 use_exit 파라미터가 true 이면 JSON 스트링을 보내고 서버를 종료합니다.
 
 false 이면 종료하지 않습니다.
+
+```c++
+FString GetUserDataJsonString(const FString &uid);
+
+FString user_data_json_string = fun::FunapiDedicatedServer::GetUserDataJsonString(uid);
+```
+
+해당 유저의 정보를 JSON 문자열의 형태로 가져옵니다.
 
 ### 에디터 모드 호환성
 에디터 모드에서도 서버 로직이 돌아가도록 하기 위해서 전처리기 지시문으로 처리하지 않고

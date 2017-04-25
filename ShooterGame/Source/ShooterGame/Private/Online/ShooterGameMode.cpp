@@ -295,6 +295,16 @@ APlayerController* AShooterGameMode::Login(UPlayer* NewPlayer, ENetRole InRemote
 	AShooterPlayerController* NewPC = Cast<AShooterPlayerController>(newPlayer);
 	AShooterPlayerState* NewPS = Cast<AShooterPlayerState>(NewPC->PlayerState);
 	NewPS->SetUID(uid);
+
+  // TODO : login
+  // fun::FunapiDedicatedServer::PostLogin(uid);
+  // //
+
+  // Get UserData
+  FString user_data_json_string = fun::FunapiDedicatedServer::GetUserDataJsonString(uid);
+  UE_LOG(LogTemp, Log, TEXT("%s"), *(user_data_json_string));
+  // //
+
 	return newPlayer;
 }
 
@@ -575,4 +585,10 @@ void AShooterGameMode::RestartGame()
 void AShooterGameMode::Logout(AController* Exiting)
 {
   Super::Logout(Exiting);
+
+  // TODO : logout
+  // AShooterPlayerState* NewPS = Cast<AShooterPlayerState>(Exiting->PlayerState);
+  // FString uid = NewPS->GetUID();
+  // fun::FunapiDedicatedServer::PostLogout(uid);
+  // //
 }
