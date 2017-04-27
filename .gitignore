@@ -1,3 +1,11 @@
-/ShooterGame/Binaries
-/ShooterGame/Intermediate
-/ShooterGame/Saved
+ShooterGame/Binaries
+ShooterGame/Intermediate
+ShooterGame/Saved
+ShooterGame/DerivedDataCache
+ShooterGame/Build/WindowsNoEditor
+ShooterGame/Plugins/Funapi/Binaries/
+ShooterGame/Plugins/Funapi/Intermediate/
+ShooterGame/Plugins/FunapiDedicatedServer/Binaries/
+ShooterGame/Plugins/FunapiDedicatedServer/Intermediate/
+
+
