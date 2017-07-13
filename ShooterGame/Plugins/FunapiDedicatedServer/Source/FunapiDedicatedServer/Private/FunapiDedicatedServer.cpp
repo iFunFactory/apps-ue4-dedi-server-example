@@ -14,8 +14,11 @@ namespace fun
     static FString funapi_manager_server_;
     static TMap<FString, FString> auth_map_;
     static TMap<FString, FString> user_data_map_;
+    static FString match_data_string_;
     static double heartbeat_seconds_ = 0;
     static double pending_users_seconds_ = 5;
+    static TFunction<void(const FString &uid, const FString &json_string)> user_data_handler_;
+    static TFunction<void(const FString &json_string)> match_data_handler_;
 
     FString GetUserDataJsonString(const FString &uid)
     {
@@ -27,8 +30,41 @@ namespace fun
       return "";
     }
 
-    void AddMap(const TSharedPtr<FJsonObject> json_object)
+    FString GetMatchDataJsonString()
     {
+      return match_data_string_;
+    }
+
+    void SetUserDataCallback(const TFunction<void(const FString &uid, const FString &json_string)> &handler)
+    {
+      user_data_handler_ = handler;
+    }
+
+    void SetMatchDataCallback(const TFunction<void(const FString &json_string)> &handler)
+    {
+      match_data_handler_ = handler;
+    }
+
+    void AddData(const TSharedPtr<FJsonObject> json_object)
+    {
+      if (json_object->HasField(FString("match_data")))
+      {
+        FString data_string;
+        if (false == json_object->TryGetStringField(FString("match_data"), data_string)) {
+          TSharedPtr<FJsonObject> game_data_object = json_object->GetObjectField(FString("match_data"));
+          // Convert JSON document to string
+          TSharedRef<TJsonWriter<TCHAR>> writer = TJsonWriterFactory<TCHAR>::Create(&data_string);
+          FJsonSerializer::Serialize(game_data_object.ToSharedRef(), writer);
+        }
+
+        if (false == data_string.IsEmpty()) {
+          if (match_data_string_ != data_string) {
+            match_data_string_ = data_string;
+            match_data_handler_(data_string);
+          }
+        }
+      }
+
       TArray<TSharedPtr<FJsonValue>> users;
       int users_count = 0;
 
@@ -50,12 +86,22 @@ namespace fun
       for (int i = 0; i < users_count; ++i) {
         TSharedPtr<FJsonObject> o = users[i]->AsObject();
 
-        FString uid = o->GetStringField(FString("uid"));
-        FString token = o->GetStringField(FString("token"));
+        FString uid;
+        FString token;
+
+        if (o->HasField(FString("uid"))) {
+          uid = o->GetStringField(FString("uid"));
+        }
+
+        if (o->HasField(FString("token"))) {
+          token = o->GetStringField(FString("token"));
+        }
 
         UE_LOG(LogFunapiDedicatedServer, Log, TEXT("%s, %s"), *uid, *token);
 
-        auth_map_.Add(uid, token);
+        if (false == uid.IsEmpty() && false == token.IsEmpty()) {
+          auth_map_.Add(uid, token);
+        }
 
         if (i < user_data_count) {
           FString user_data_json_string;
@@ -67,7 +113,20 @@ namespace fun
             FJsonSerializer::Serialize(user_data_object.ToSharedRef(), writer);
           }
 
-          user_data_map_.Add(uid, user_data_json_string);
+          if (false == uid.IsEmpty() && false == user_data_json_string.IsEmpty()) {
+            bool use_callback = true;
+            if (user_data_map_.Contains(uid)) {
+              if (user_data_map_[uid] == user_data_json_string) {
+                use_callback = false;
+              }
+            }
+
+            user_data_map_.Add(uid, user_data_json_string);
+
+            if (use_callback) {
+              user_data_handler_(uid, user_data_json_string);
+            }
+          }
         }
       }
     }
@@ -211,6 +270,17 @@ namespace fun
         // server_url = "http://www.mocky.io/v2/58fdd4260f0000e10e08b954";
         server_url = "http://www.mocky.io/v2/58fdd8d90f0000660f08b970";
       }
+      */
+      /*
+      // FString test_verb = verb;
+      if (verb == "POST" && path == "pending_users") {
+        test_verb = "GET";
+        static int url_index = 0;
+        if (url_index == 0) server_url = "http://www.mocky.io/v2/59670718110000810cb6c04e";
+        else if (url_index == 1) server_url = "http://www.mocky.io/v2/5967248a110000e40eb6c0b7";
+        else server_url = "http://www.mocky.io/v2/59671094110000760db6c060";
+        ++url_index;
+      }
       // // // //
       */
 
@@ -262,7 +332,7 @@ namespace fun
           if (FJsonSerializer::Deserialize(reader, json_object))
           {
             TSharedPtr<FJsonObject> data = json_object->GetObjectField(FString("data"));
-            AddMap(data);
+            AddData(data);
           }
         }
 
@@ -324,7 +394,7 @@ namespace fun
           TSharedPtr<FJsonObject> json_object;
           if (FJsonSerializer::Deserialize(reader, json_object))
           {
-            AddMap(json_object);
+            AddData(json_object);
           }
         }
 
@@ -334,24 +404,26 @@ namespace fun
 
     FString JsonFStringWithUID(const FString &uid) {
       TSharedRef<FJsonObject> json_object = MakeShareable(new FJsonObject);
-      json_object->SetStringField(FString("name"), uid);
+      json_object->SetStringField(FString("uid"), uid);
 
       // Convert JSON document to string
       FString ouput_fstring;
       TSharedRef<TJsonWriter<TCHAR>> writer = TJsonWriterFactory<TCHAR>::Create(&ouput_fstring);
       FJsonSerializer::Serialize(json_object, writer);
 
+      // UE_LOG(LogFunapiDedicatedServer, Log, TEXT("JsonFStringWithUID = %s"), *ouput_fstring);
+
       return ouput_fstring;
     }
 
-    void PostLogin(const FString &uid)
+    void PostJoined(const FString &uid)
     {
-      Post("login", JsonFStringWithUID(uid));
+      Post("joined", JsonFStringWithUID(uid));
     }
 
-    void PostLogout(const FString &uid)
+    void PostLeft(const FString &uid)
     {
-      Post("logout", JsonFStringWithUID(uid));
+      Post("left", JsonFStringWithUID(uid));
     }
 
     bool AuthUser(const FString& options, FString &error_message)
@@ -401,6 +473,11 @@ namespace fun
       }
 
       return ret;
+    }
+
+    void PostCustomCallback(const FString &json_string)
+    {
+      Post("callback", json_string);
     }
   }
 }

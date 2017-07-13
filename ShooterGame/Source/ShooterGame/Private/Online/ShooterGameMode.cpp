@@ -30,9 +30,18 @@ AShooterGameMode::AShooterGameMode(const FObjectInitializer& ObjectInitializer) 
 
 	MinRespawnDelay = 5.0f;
 
-	bAllowBots = true;	
+	bAllowBots = true;
 	bNeedsBotCreation = true;
-	bUseSeamlessTravel = true;	
+	bUseSeamlessTravel = true;
+
+  // Callback
+  fun::FunapiDedicatedServer::SetUserDataCallback([](const FString &uid, const FString &user_data_json_string) {
+    UE_LOG(LogTemp, Log, TEXT("SetUserDataCallback - %s = %s"), *(uid), *(user_data_json_string));
+  });
+  fun::FunapiDedicatedServer::SetMatchDataCallback([](const FString &match_data_json_string) {
+    UE_LOG(LogTemp, Log, TEXT("SetMatchDataCallback - match_data = %s"), *(match_data_json_string));
+  });
+  // //
 }
 
 FString AShooterGameMode::GetBotsCountOptionName()
@@ -54,6 +63,8 @@ void AShooterGameMode::InitGame(const FString& MapName, const FString& Options, 
 
   // test code
   fun::FunapiDedicatedServer::PostReady();
+  // //
+  // fun::FunapiDedicatedServer::PostCallback(FString("{ \"message\":\"callback\"}"));
   // //
 }
 
@@ -296,14 +307,17 @@ APlayerController* AShooterGameMode::Login(UPlayer* NewPlayer, ENetRole InRemote
 	AShooterPlayerState* NewPS = Cast<AShooterPlayerState>(NewPC->PlayerState);
 	NewPS->SetUID(uid);
 
-  // TODO : login
-  // fun::FunapiDedicatedServer::PostLogin(uid);
+  // joined
+  fun::FunapiDedicatedServer::PostJoined(uid);
   // //
 
   // Get UserData
   FString user_data_json_string = fun::FunapiDedicatedServer::GetUserDataJsonString(uid);
   UE_LOG(LogTemp, Log, TEXT("%s"), *(user_data_json_string));
-  // //
+
+  // Get GameData
+  FString match_data_json_string = fun::FunapiDedicatedServer::GetMatchDataJsonString();
+  UE_LOG(LogTemp, Log, TEXT("%s"), *(match_data_json_string));
 
 	return newPlayer;
 }
@@ -367,6 +381,10 @@ float AShooterGameMode::ModifyDamage(float Damage, AActor* DamagedActor, struct 
 			ActualDamage *= DamageSelfScale;
 		}
 	}
+
+  // test code
+  // fun::FunapiDedicatedServer::PostCallback(FString("{ \"callback\":\"ActualDamage\"}"));
+  // //
 
 	return ActualDamage;
 }
@@ -586,9 +604,9 @@ void AShooterGameMode::Logout(AController* Exiting)
 {
   Super::Logout(Exiting);
 
-  // TODO : logout
-  // AShooterPlayerState* NewPS = Cast<AShooterPlayerState>(Exiting->PlayerState);
-  // FString uid = NewPS->GetUID();
-  // fun::FunapiDedicatedServer::PostLogout(uid);
+  // left
+  AShooterPlayerState* NewPS = Cast<AShooterPlayerState>(Exiting->PlayerState);
+  FString uid = NewPS->GetUID();
+  fun::FunapiDedicatedServer::PostLeft(uid);
   // //
 }

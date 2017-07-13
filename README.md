@@ -180,6 +180,58 @@ FString user_data_json_string = fun::FunapiDedicatedServer::GetUserDataJsonStrin
 
 해당 유저의 정보를 JSON 문자열의 형태로 가져옵니다.
 
+```c++
+FString GetMatchDataJsonString();
+
+FString game_data_json_string = fun::FunapiDedicatedServer::GetMatchDataJsonString();
+```
+
+게임 정보를 JSON 문자열의 형태로 가져옵니다.
+
+```c++
+void SetUserDataCallback(const TFunction<void(const FString &uid, const FString &json_string)> &handler);
+
+fun::FunapiDedicatedServer::SetUserDataCallback([](const FString &uid, const FString &user_data_json_string) {
+  UE_LOG(LogTemp, Log, TEXT("%s = %s"), *(uid), *(user_data_json_string));
+});
+```
+
+유저 데이터가 변경 되었을 때 콜백을 받습니다.
+
+```c++
+void SetMatchDataCallback(const TFunction<void(const FString &json_string)> &handler);
+
+fun::FunapiDedicatedServer::SetMatchDataCallback([](const FString &match_data_json_string) {
+  UE_LOG(LogTemp, Log, TEXT("match_data = %s"), *(match_data_json_string));
+});
+```
+
+게임 데이터가 변경 되었을 때 콜백을 받습니다.
+
+```c++
+void PostJoined(const FString &uid);
+
+fun::FunapiDedicatedServer::PostJoined(uid);
+```
+
+유저가 로그인 했을때 uid 를 **데디케이티드 서버 매니저**에 보냅니다.
+
+```c++
+void PostLeft(const FString &uid);
+
+fun::FunapiDedicatedServer::PostLeft(uid);
+```
+
+유저가 로그아웃 했을때 uid 를 **데디케이티드 서버 매니저**에 보냅니다.
+
+```c++
+void PostCustomCallback(const FString &json_string);
+
+fun::FunapiDedicatedServer::PostCustomCallback(FString("{ \"message\":\"callback\"}"));
+```
+
+**데디케이티드 서버 매니저**에 콜백을 보냅니다.
+
 ### 에디터 모드 호환성
 에디터 모드에서도 서버 로직이 돌아가도록 하기 위해서 전처리기 지시문으로 처리하지 않고
 커맨드 라인 파싱을 통해 서버 주소가 제대로 초기화 되었는지를 확인하는 기준으로 플러그인의 동작을 판단하도록 합니다.

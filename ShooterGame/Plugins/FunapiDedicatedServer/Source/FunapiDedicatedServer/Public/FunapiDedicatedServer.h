@@ -9,6 +9,9 @@
 namespace fun {
   namespace FunapiDedicatedServer {
     extern FUNAPIDEDICATEDSERVER_API FString GetUserDataJsonString(const FString &uid);
+    extern FUNAPIDEDICATEDSERVER_API FString GetMatchDataJsonString();
+    extern FUNAPIDEDICATEDSERVER_API void SetUserDataCallback(const TFunction<void(const FString &uid, const FString &json_string)> &handler);
+    extern FUNAPIDEDICATEDSERVER_API void SetMatchDataCallback(const TFunction<void(const FString &json_string)> &handler);
     extern FUNAPIDEDICATEDSERVER_API bool ParseConsoleCommand(const TCHAR* cmd);
     extern FUNAPIDEDICATEDSERVER_API bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field);
     extern FUNAPIDEDICATEDSERVER_API bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field, const FString &heartbeat_field);
@@ -20,9 +23,10 @@ namespace fun {
     extern FUNAPIDEDICATEDSERVER_API void PostResult(const FString &json_string, const bool use_exit);
     extern FUNAPIDEDICATEDSERVER_API void PostHeartbeat();
     extern FUNAPIDEDICATEDSERVER_API void PostGameState(const FString &json_string);
-    // extern FUNAPIDEDICATEDSERVER_API void PostLogin(const FString &uid);
-    // extern FUNAPIDEDICATEDSERVER_API void PostLogout(const FString &uid);
+    extern FUNAPIDEDICATEDSERVER_API void PostJoined(const FString &uid);
+    extern FUNAPIDEDICATEDSERVER_API void PostLeft(const FString &uid);
     extern FUNAPIDEDICATEDSERVER_API bool AuthUser(const FString& options, const FString& uid_field, const FString& token_field, FString &error_message);
     extern FUNAPIDEDICATEDSERVER_API bool AuthUser(const FString& options, FString &error_message);
+    extern FUNAPIDEDICATEDSERVER_API void PostCallback(const FString &json_string);
   }
 }
