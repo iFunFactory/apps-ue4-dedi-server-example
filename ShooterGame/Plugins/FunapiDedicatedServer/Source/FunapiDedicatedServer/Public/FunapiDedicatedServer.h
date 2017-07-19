@@ -27,6 +27,6 @@ namespace fun {
     extern FUNAPIDEDICATEDSERVER_API void PostLeft(const FString &uid);
     extern FUNAPIDEDICATEDSERVER_API bool AuthUser(const FString& options, const FString& uid_field, const FString& token_field, FString &error_message);
     extern FUNAPIDEDICATEDSERVER_API bool AuthUser(const FString& options, FString &error_message);
-    extern FUNAPIDEDICATEDSERVER_API void PostCallback(const FString &json_string);
+    extern FUNAPIDEDICATEDSERVER_API void PostCustomCallback(const FString &json_string);
   }
 }

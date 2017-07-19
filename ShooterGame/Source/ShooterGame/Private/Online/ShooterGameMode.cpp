@@ -64,7 +64,7 @@ void AShooterGameMode::InitGame(const FString& MapName, const FString& Options, 
   // test code
   fun::FunapiDedicatedServer::PostReady();
   // //
-  // fun::FunapiDedicatedServer::PostCallback(FString("{ \"message\":\"callback\"}"));
+  // fun::FunapiDedicatedServer::PostCustomCallback(FString("{ \"message\":\"callback\"}"));
   // //
 }
 
@@ -383,7 +383,7 @@ float AShooterGameMode::ModifyDamage(float Damage, AActor* DamagedActor, struct 
 	}
 
   // test code
-  // fun::FunapiDedicatedServer::PostCallback(FString("{ \"callback\":\"ActualDamage\"}"));
+  // fun::FunapiDedicatedServer::PostCustomCallback(FString("{ \"callback\":\"ActualDamage\"}"));
   // //
 
 	return ActualDamage;
