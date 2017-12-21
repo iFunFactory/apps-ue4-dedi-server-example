@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "Weapons/ShooterWeapon.h"
@@ -720,10 +720,9 @@ FVector AShooterWeapon::GetMuzzleDirection() const
 
 FHitResult AShooterWeapon::WeaponTrace(const FVector& StartTrace, const FVector& EndTrace) const
 {
-	static FName WeaponFireTag = FName(TEXT("WeaponTrace"));
 
 	// Perform trace to retrieve hit info
-	FCollisionQueryParams TraceParams(WeaponFireTag, true, Instigator);
+	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, Instigator);
 	TraceParams.bTraceAsyncScene = true;
 	TraceParams.bReturnPhysicalMaterial = true;
 
@@ -844,9 +843,9 @@ void AShooterWeapon::SimulateWeaponFire()
 		{
 			PC->ClientPlayCameraShake(FireCameraShake, 1);
 		}
-		if (FireForceFeedback != NULL)
+		if (FireForceFeedback != NULL && PC->IsVibrationEnabled())
 		{
-			PC->ClientPlayForceFeedback(FireForceFeedback, false, "Weapon");
+			PC->ClientPlayForceFeedback(FireForceFeedback, false, false, "Weapon");
 		}
 	}
 }

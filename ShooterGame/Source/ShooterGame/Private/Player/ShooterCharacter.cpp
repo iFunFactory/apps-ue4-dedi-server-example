@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "Weapons/ShooterWeapon.h"
@@ -341,13 +341,13 @@ void AShooterCharacter::OnDeath(float KillingDamage, struct FDamageEvent const& 
 		ReplicateHit(KillingDamage, DamageEvent, PawnInstigator, DamageCauser, true);
 
 		// play the force feedback effect on the client player controller
-		APlayerController* PC = Cast<APlayerController>(Controller);
+		AShooterPlayerController* PC = Cast<AShooterPlayerController>(Controller);
 		if (PC && DamageEvent.DamageTypeClass)
 		{
 			UShooterDamageType *DamageType = Cast<UShooterDamageType>(DamageEvent.DamageTypeClass->GetDefaultObject());
-			if (DamageType && DamageType->KilledForceFeedback)
+			if (DamageType && DamageType->KilledForceFeedback && PC->IsVibrationEnabled())
 			{
-				PC->ClientPlayForceFeedback(DamageType->KilledForceFeedback, false, "Damage");
+				PC->ClientPlayForceFeedback(DamageType->KilledForceFeedback, false, false, "Damage");
 			}
 		}
 	}
@@ -418,13 +418,13 @@ void AShooterCharacter::PlayHit(float DamageTaken, struct FDamageEvent const& Da
 		ReplicateHit(DamageTaken, DamageEvent, PawnInstigator, DamageCauser, false);
 
 		// play the force feedback effect on the client player controller
-		APlayerController* PC = Cast<APlayerController>(Controller);
+		AShooterPlayerController* PC = Cast<AShooterPlayerController>(Controller);
 		if (PC && DamageEvent.DamageTypeClass)
 		{
 			UShooterDamageType *DamageType = Cast<UShooterDamageType>(DamageEvent.DamageTypeClass->GetDefaultObject());
-			if (DamageType && DamageType->HitForceFeedback)
+			if (DamageType && DamageType->HitForceFeedback && PC->IsVibrationEnabled())
 			{
-				PC->ClientPlayForceFeedback(DamageType->HitForceFeedback, false, "Damage");
+				PC->ClientPlayForceFeedback(DamageType->HitForceFeedback, false, false, "Damage");
 			}
 		}
 	}
@@ -1172,8 +1172,7 @@ bool AShooterCharacter::IsReplicationPausedForConnection(const FNetViewer& Conne
 		FRotator ViewRotation;
 		PC->GetPlayerViewPoint(ViewLocation, ViewRotation);
 
-		static FName NAME_LineOfSight = FName(TEXT("LineOfSight"));
-		FCollisionQueryParams CollisionParams(NAME_LineOfSight, true, PC->GetPawn());
+		FCollisionQueryParams CollisionParams(SCENE_QUERY_STAT(LineOfSight), true, PC->GetPawn());
 		CollisionParams.AddIgnoredActor(this);
 
 		TArray<FVector> PointsToTest;
@@ -1278,7 +1277,7 @@ void AShooterCharacter::UpdateTeamColorsAllMIDs()
 
 void AShooterCharacter::BuildPauseReplicationCheckPoints(TArray<FVector>& RelevancyCheckPoints)
 {
-	FBoxSphereBounds Bounds = GetCapsuleComponent()->CalcBounds(GetCapsuleComponent()->ComponentToWorld);
+	FBoxSphereBounds Bounds = GetCapsuleComponent()->CalcBounds(GetCapsuleComponent()->GetComponentTransform());
 	FBox BoundingBox = Bounds.GetBox();
 	float XDiff = Bounds.BoxExtent.X * 2;
 	float YDiff = Bounds.BoxExtent.Y * 2;

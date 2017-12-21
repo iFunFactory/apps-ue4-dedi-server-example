@@ -549,7 +549,7 @@ void AShooterHUD::DrawHUD()
 			IOnlineSessionPtr SessionSubsystem = OnlineSubsystem->GetSessionInterface();
 			if(SessionSubsystem.IsValid())
 			{
-				FNamedOnlineSession * Session = SessionSubsystem->GetNamedSession(GameSessionName);
+				FNamedOnlineSession * Session = SessionSubsystem->GetNamedSession(NAME_GameSession);
 				if(Session)
 				{
 					NetModeDesc += TEXT("\nSession: ");

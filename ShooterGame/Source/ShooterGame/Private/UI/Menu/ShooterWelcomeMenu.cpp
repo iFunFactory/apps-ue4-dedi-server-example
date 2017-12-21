@@ -122,7 +122,7 @@ class SShooterWelcomeMenuWidget : public SCompoundWidget
 							const auto ExternalUI = OnlineSub->GetExternalUIInterface();
 							if (ExternalUI.IsValid())
 							{
-								ExternalUI->ShowLoginUI(InKeyEvent.GetUserIndex(), false, FOnLoginUIClosedDelegate::CreateSP(MenuOwner, &FShooterWelcomeMenu::HandleLoginUIClosed));
+								ExternalUI->ShowLoginUI(InKeyEvent.GetUserIndex(), false, true, FOnLoginUIClosedDelegate::CreateSP(MenuOwner, &FShooterWelcomeMenu::HandleLoginUIClosed));
 								bSkipToMainMenu = false;
 							}
 						}

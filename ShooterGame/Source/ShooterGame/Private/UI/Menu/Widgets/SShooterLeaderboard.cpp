@@ -78,6 +78,32 @@ void SShooterLeaderboard::Construct(const FArguments& InArgs)
 	];
 }
 
+void SShooterLeaderboard::ReadStatsLoginRequired()
+{
+	if (!OnLoginCompleteDelegateHandle.IsValid())
+	{
+		IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
+		if (OnlineSub)
+		{
+			IOnlineIdentityPtr Identity = OnlineSub->GetIdentityInterface();
+			if (Identity.IsValid())
+			{
+				OnLoginCompleteDelegateHandle = Identity->AddOnLoginCompleteDelegate_Handle(0, FOnLoginCompleteDelegate::CreateRaw(this, &SShooterLeaderboard::OnLoginCompleteReadStats));
+				Identity->Login(0, FOnlineAccountCredentials());
+			}
+		}
+	}
+}
+
+void SShooterLeaderboard::OnLoginCompleteReadStats(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error)
+{
+	IOnlineSubsystem::Get()->GetIdentityInterface()->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, OnLoginCompleteDelegateHandle);
+	if (bWasSuccessful)
+	{
+		ReadStats();
+	}
+}
+
 /** Starts reading leaderboards for the game */
 void SShooterLeaderboard::ReadStats()
 {

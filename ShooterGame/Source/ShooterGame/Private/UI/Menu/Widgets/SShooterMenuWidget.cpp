@@ -11,6 +11,7 @@
 #include "ShooterGameInstance.h"
 #include "Player/ShooterLocalPlayer.h"
 #include "ShooterGameUserSettings.h"
+#include "Slate/SceneViewport.h"
 
 #define LOCTEXT_NAMESPACE "SShooterMenuWidget"
 
@@ -156,6 +157,8 @@ void SShooterMenuWidget::Construct(const FArguments& InArgs)
 						.AutoWidth()
 						[
 							SNew(SVerticalBox)
+							.Clipping(EWidgetClipping::ClipToBounds)
+
 							+ SVerticalBox::Slot()
 							.AutoHeight()
 							.Padding(TAttribute<FMargin>(this,&SShooterMenuWidget::GetLeftMenuOffset))
@@ -169,13 +172,17 @@ void SShooterMenuWidget::Construct(const FArguments& InArgs)
 								.HAlign(HAlign_Left)
 								[
 									SAssignNew(LeftBox, SVerticalBox)
+									.Clipping(EWidgetClipping::ClipToBounds)
 								]
 							]
 						]
+						
 						+ SHorizontalBox::Slot()
 						.AutoWidth()
 						[
 							SNew(SVerticalBox)
+							.Clipping(EWidgetClipping::ClipToBounds)
+
 							+ SVerticalBox::Slot()
 							.Padding(TAttribute<FMargin>(this,&SShooterMenuWidget::GetSubMenuOffset))
 							.AutoHeight()
@@ -189,6 +196,7 @@ void SShooterMenuWidget::Construct(const FArguments& InArgs)
 								.HAlign(HAlign_Left)
 								[
 									SAssignNew(RightBox, SVerticalBox)
+									.Clipping(EWidgetClipping::ClipToBounds)
 								]
 							]
 						]
@@ -638,7 +646,7 @@ void SShooterMenuWidget::Tick( const FGeometry& AllottedGeometry, const double I
 		FViewport* Viewport = GEngine->GameViewport->ViewportFrame->GetViewport();
 		if (Viewport)
 		{
-			ScreenRes = Viewport->GetSizeXY();
+			ScreenRes = Viewport->GetSizeXY() / AllottedGeometry.Scale;
 		}
 	}
 

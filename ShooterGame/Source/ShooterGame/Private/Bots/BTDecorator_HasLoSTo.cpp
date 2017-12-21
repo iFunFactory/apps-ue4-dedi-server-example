@@ -102,7 +102,6 @@ bool UBTDecorator_HasLoSTo::CalculateRawConditionValue(UBehaviorTreeComponent& O
 
 bool UBTDecorator_HasLoSTo::LOSTrace(AActor* InActor, AActor* InEnemyActor, const FVector& EndLocation) const
 {
-	static FName LosTag = FName(TEXT("AILosTrace"));
 	AShooterAIController* MyController = Cast<AShooterAIController>(InActor);
 	AShooterBot* MyBot = MyController ? Cast<AShooterBot>(MyController->GetPawn()) : NULL; 
 
@@ -111,7 +110,7 @@ bool UBTDecorator_HasLoSTo::LOSTrace(AActor* InActor, AActor* InEnemyActor, cons
 		if (MyBot != NULL)
 		{
 			// Perform trace to retrieve hit info
-			FCollisionQueryParams TraceParams(LosTag, true, InActor);
+			FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(AILosTrace), true, InActor);
 			TraceParams.bTraceAsyncScene = true;
 			
 			TraceParams.bReturnPhysicalMaterial = true;

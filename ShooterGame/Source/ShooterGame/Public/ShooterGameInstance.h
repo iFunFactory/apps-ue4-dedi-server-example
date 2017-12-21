@@ -6,6 +6,7 @@
 #include "OnlineIdentityInterface.h"
 #include "OnlineSessionInterface.h"
 #include "Engine/GameInstance.h"
+#include "Engine/NetworkDelegates.h"
 #include "ShooterGameInstance.generated.h"
 
 #if WITH_FUNAPI
@@ -87,6 +88,13 @@ private:
 	FSlateColor GetTextColor() const;
 };
 
+UENUM()
+enum class EOnlineMode : uint8
+{
+	Offline,
+	LAN,
+	Online
+};
 
 
 UCLASS(config=Game)
@@ -104,7 +112,8 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;
 	virtual void StartGameInstance() override;
-
+	virtual void ReceivedNetworkEncryptionToken(const FString& EncryptionToken, const FOnEncryptionKeyResponse& Delegate) override;
+	virtual void ReceivedNetworkEncryptionAck(const FOnEncryptionKeyResponse& Delegate) override;
 
 	bool HostGame(ULocalPlayer* LocalPlayer, const FString& GameType, const FString& InTravelURL);
 	bool JoinSession(ULocalPlayer* LocalPlayer, int32 SessionIndexInSearchResults);
@@ -120,7 +129,7 @@ public:
 	void BeginHostingQuickMatch();
 
 	/** Initiates the session searching */
-	bool FindSessions(ULocalPlayer* PlayerOwner, bool bLANMatch);
+	bool FindSessions(ULocalPlayer* PlayerOwner, bool bIsDedicatedServer, bool bLANMatch);
 
 	/** Sends the game to the specified state. */
 	void GotoState(FName NewState);
@@ -148,10 +157,13 @@ public:
 	TSharedPtr< const FUniqueNetId > GetUniqueNetIdFromControllerId( const int ControllerId );
 
 	/** Returns true if the game is in online mode */
-	bool GetIsOnline() const { return bIsOnline; }
+	EOnlineMode GetOnlineMode() const { return OnlineMode; }
 
 	/** Sets the online mode of the game */
-	void SetIsOnline(bool bInIsOnline);
+	void SetOnlineMode(EOnlineMode InOnlineMode);
+
+	/** Updates the status of using multiplayer features */
+	void UpdateUsingMultiplayerFeatures(bool bIsUsingMultiplayerFeatures);
 
 	/** Sets the controller to ignore for pairing changes. Useful when we are showing external UI for manual profile switching. */
 	void SetIgnorePairingChangeForControllerId( const int32 ControllerId );
@@ -159,8 +171,14 @@ public:
 	/** Returns true if the passed in local player is signed in and online */
 	bool IsLocalPlayerOnline(ULocalPlayer* LocalPlayer);
 
+	/** Returns true if the passed in local player is signed in*/
+	bool IsLocalPlayerSignedIn(ULocalPlayer* LocalPlayer);
+
 	/** Returns true if owning player is online. Displays proper messaging if the user can't play */
 	bool ValidatePlayerForOnlinePlay(ULocalPlayer* LocalPlayer);
+
+	/** Returns true if owning player is signed in. Displays proper messaging if the user can't play */
+	bool ValidatePlayerIsSignedIn(ULocalPlayer* LocalPlayer);
 
 	/** Shuts down the session, and frees any net driver */
 	void CleanupSessionOnReturnToMenu();
@@ -209,8 +227,8 @@ private:
 	/** URL to travel to after pending network operations */
 	FString TravelURL;
 
-	/** Whether the match is online or not */
-	bool bIsOnline;
+	/** Current online mode of the game (offline, LAN, or online) */
+	EOnlineMode OnlineMode;
 
 	/** If true, enable splitscreen when map starts loading */
 	bool bPendingEnableSplitscreen;
@@ -252,12 +270,18 @@ private:
 	/** Play Together on PS4 system event info */
 	FShooterPlayTogetherInfo PlayTogetherInfo;
 
+	/** Local player login status when the system is suspended */
+	TArray<ELoginStatus::Type> LocalPlayerOnlineStatus;
+
+	/** A hard-coded encryption key used to try out the encryption code. This is NOT SECURE, do not use this technique in production! */
+	TArray<uint8> DebugTestEncryptionKey;
+
 	void HandleNetworkConnectionStatusChanged(  EOnlineServerConnectionStatus::Type LastConnectionStatus, EOnlineServerConnectionStatus::Type ConnectionStatus );
 
 	void HandleSessionFailure( const FUniqueNetId& NetId, ESessionFailure::Type FailureType );
 	
 	void OnPreLoadMap(const FString& MapName);
-	void OnPostLoadMap();
+	void OnPostLoadMap(UWorld*);
 	void OnPostDemoPlay();
 
 	virtual void HandleDemoPlaybackFailure( EDemoPlayFailure::Type FailureType, const FString& ErrorString ) override;
@@ -332,7 +356,7 @@ private:
 	bool LoadFrontEndMap(const FString& MapName);
 
 	/** Sets a rich presence string for all local players. */
-	void SetPresenceForLocalPlayers(const FVariantData& PresenceData);
+	void SetPresenceForLocalPlayers(const FString& StatusStr, const FVariantData& PresenceData);
 
 	/** Travel directly to the named session */
 	void InternalTravelToSession(const FName& SessionName);

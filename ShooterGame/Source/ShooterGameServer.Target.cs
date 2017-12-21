@@ -6,22 +6,11 @@ using System.Collections.Generic;
 [SupportedPlatforms(UnrealPlatformClass.Server)]
 public class ShooterGameServerTarget : TargetRules
 {
-	public ShooterGameServerTarget(TargetInfo Target)
+	public ShooterGameServerTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Server;
-		bUsesSteam = false;
-	}
+		bUsesSteam = true;
 
-	//
-	// TargetRules interface.
-	//
-
-	public override void SetupBinaries(
-		TargetInfo Target,
-		ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-		ref List<string> OutExtraModuleNames
-		)
-	{
-		OutExtraModuleNames.Add("ShooterGame");
+		ExtraModuleNames.Add("ShooterGame");
 	}
 }

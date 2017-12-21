@@ -33,8 +33,6 @@ public:
 
 	void SetIsJoining( const bool _bIsJoining ) { bIsJoining =_bIsJoining; }
 
-	void SetIsOnline( const bool _bIsOnline ) { bIsOnline =_bIsOnline; }
-
 private:
 	bool IsUniqueIdOnline( const FUniqueNetId& ControllerId ) const;
 
@@ -54,6 +52,9 @@ private:
 	UShooterGameInstance* GetGameInstance() const;
 
 	FText GetPlayFindText() const;
+#if PLATFORM_SWITCH
+	FText GetPlayAsGuestText() const;
+#endif
 
 	FReply OnOkOrCancel();
 	bool ConfirmSponsorsSatisfied() const;
@@ -77,14 +78,14 @@ private:
 	FText PressToFindText;
 	FText PressToStartMatchText;
 #if PLATFORM_SWITCH
-	FText PressToConnectText;
+	FText PlayAsGuestText;
 #endif
+
+	void OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
+	FDelegateHandle OnLoginCompleteDelegateHandle;
 
 	int PendingControllerId;
 
 	/** True if we joining a match */
 	bool bIsJoining;
-
-	/** True if we are online */
-	bool bIsOnline;
 };

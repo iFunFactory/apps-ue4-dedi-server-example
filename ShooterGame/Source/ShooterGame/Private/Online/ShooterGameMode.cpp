@@ -30,9 +30,9 @@ AShooterGameMode::AShooterGameMode(const FObjectInitializer& ObjectInitializer) 
 
 	MinRespawnDelay = 5.0f;
 
-	bAllowBots = true;
+	bAllowBots = true;	
 	bNeedsBotCreation = true;
-	bUseSeamlessTravel = true;
+	bUseSeamlessTravel = true;	
 
   // Callback
   fun::FunapiDedicatedServer::SetUserDataCallback([](const FString &uid, const FString &user_data_json_string) {
@@ -56,7 +56,7 @@ void AShooterGameMode::InitGame(const FString& MapName, const FString& Options, 
 	Super::InitGame(MapName, Options, ErrorMessage);
 
 	const UGameInstance* GameInstance = GetGameInstance();
-	if (GameInstance && Cast<UShooterGameInstance>(GameInstance)->GetIsOnline())
+	if (GameInstance && Cast<UShooterGameInstance>(GameInstance)->GetOnlineMode() != EOnlineMode::Offline)
 	{
 		bPauseable = false;
 	}

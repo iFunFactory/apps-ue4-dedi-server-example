@@ -68,7 +68,7 @@ bool ShooterUIHelpers::ProfileSwapUI(const int ControllerIndex, bool bShowOnline
 					// do nothing
 				}
 			};
-			return ExternalUI->ShowLoginUI(ControllerIndex, bShowOnlineOnly, Delegate ? *Delegate : FOnLoginUIClosedDelegate::CreateStatic(&Local::DummyOnProfileSwapUIClosedDelegate) );
+			return ExternalUI->ShowLoginUI(ControllerIndex, bShowOnlineOnly, false, Delegate ? *Delegate : FOnLoginUIClosedDelegate::CreateStatic(&Local::DummyOnProfileSwapUIClosedDelegate) );
 		}
 	}
 	return false;

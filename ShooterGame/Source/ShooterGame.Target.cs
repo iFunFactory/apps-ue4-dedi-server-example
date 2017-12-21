@@ -5,24 +5,17 @@ using System.Collections.Generic;
 
 public class ShooterGameTarget : TargetRules
 {
-    public ShooterGameTarget(TargetInfo Target)
+    public ShooterGameTarget(TargetInfo Target) : base(Target)
     {
         Type = TargetType.Game;
-        bUsesSteam = false;
-    }
+        bUsesSteam = true;
+
+		ExtraModuleNames.Add("ShooterGame");
+	}
 
     //
     // TargetRules interface.
     //
-
-    public override void SetupBinaries(
-        TargetInfo Target,
-        ref List<UEBuildBinaryConfiguration> OutBuildBinaryConfigurations,
-        ref List<string> OutExtraModuleNames
-        )
-    {
-        OutExtraModuleNames.Add("ShooterGame");
-    }
 
     public override void SetupGlobalEnvironment(
             TargetInfo Target,

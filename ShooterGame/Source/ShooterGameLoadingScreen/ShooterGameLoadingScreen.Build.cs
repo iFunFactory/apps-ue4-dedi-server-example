@@ -6,7 +6,7 @@ using UnrealBuildTool;
 
 public class ShooterGameLoadingScreen : ModuleRules
 {
-    public ShooterGameLoadingScreen(TargetInfo Target)
+    public ShooterGameLoadingScreen(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PrivateIncludePaths.Add("../../ShooterGame/Source/ShooterGameLoadingScreen/Private");
 

@@ -33,16 +33,15 @@ void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 #endif
 
 #if PLATFORM_SWITCH
-	PressToPlayText = LOCTEXT("PressToPlay", "Press <img src=\"ShooterGame.Switch.Right\"/> to Play");
+	PressToPlayText = LOCTEXT("PressToPlay", "<img src=\"ShooterGame.Switch.Right\"/> Select User");
 	PressToFindText = LOCTEXT("PressToFind", "Press <img src=\"ShooterGame.Switch.Right\"/> to Find Match");
-	PressToStartMatchText = LOCTEXT("PressToStart", "Press <img src=\"ShooterGame.Switch.Right\"/> To Start Match");
-	PressToConnectText = LOCTEXT("PressToConnect", "Press <img src=\"ShooterGame.Switch.Up\"/> To Connect Controllers");
+	PressToStartMatchText = LOCTEXT("PressToStart", "<img src=\"ShooterGame.Switch.Right\"/> Start Match / <img src=\"ShooterGame.Switch.Up\"/> Connect Controllers");
+	PlayAsGuestText = LOCTEXT("PlayAsGuest", "<img src=\"ShooterGame.Switch.Left\"/> Play As Guest");
 #endif	
 
 	PlayerOwner = InArgs._PlayerOwner;
 
 	bIsJoining = false;
-	bIsOnline = true;
 
 	const FShooterMenuStyle* ItemStyle = &FShooterStyle::Get().GetWidgetStyle<FShooterMenuStyle>("DefaultShooterMenuStyle");
 	const FSlateBrush* SlotBrush = &ItemStyle->LeftBackgroundBrush;
@@ -152,7 +151,7 @@ void SShooterSplitScreenLobby::Construct( const FArguments& InArgs )
 							[							
 								SNew(SRichTextBlock)
 								.TextStyle(FShooterStyle::Get(), "ShooterGame.SplitScreenLobby.StartMatchTextStyle")							
-								.Text(PressToConnectText)
+								.Text(this, &SShooterSplitScreenLobby::GetPlayAsGuestText)
 								.DecoratorStyleSet(&FShooterStyle::Get())
 								+ SRichTextBlock::ImageDecorator()
 							]
@@ -293,34 +292,37 @@ void SShooterSplitScreenLobby::UpdateSlots()
 
 void SShooterSplitScreenLobby::ConditionallyReadyPlayer( const int ControllerId, const bool bCanShowUI )
 {
-	if (GetGameInstance() == nullptr)
+	UShooterGameInstance* const GameInstance = GetGameInstance();
+	if (GameInstance == nullptr)
 	{
 		return;
 	}
 	
-	if ( GetGameInstance()->GetNumLocalPlayers() >= GetNumSupportedSlots() )
+	if (GameInstance->GetNumLocalPlayers() >= GetNumSupportedSlots() )
 	{
 		return;		// Can't fit any more players at this point
 	}
 
 	// If we already have this controller id registered, ignore this request
-	if ( GetGameInstance()->FindLocalPlayerFromControllerId( ControllerId ) != NULL )
+	if (GameInstance->FindLocalPlayerFromControllerId( ControllerId ) != NULL )
 	{
 		return;
 	}
 
-	TSharedPtr< const FUniqueNetId > UniqueNetId = GetGameInstance()->GetUniqueNetIdFromControllerId( ControllerId );
+	TSharedPtr< const FUniqueNetId > UniqueNetId = GameInstance->GetUniqueNetIdFromControllerId( ControllerId );
 
 	const bool bIsPlayerOnline		= ( UniqueNetId.IsValid() && IsUniqueIdOnline( *UniqueNetId ) );
-	const bool bFoundExistingPlayer = GetGameInstance()->FindLocalPlayerFromUniqueNetId( UniqueNetId ) != nullptr;
-
+	const bool bFoundExistingPlayer = GameInstance->FindLocalPlayerFromUniqueNetId( UniqueNetId ) != nullptr;
+	const EOnlineMode OnlineMode = GameInstance->GetOnlineMode();
 	// If this is an online game, reject and show sign-in if:
 	//	1. We have already registered this FUniqueNetId
 	//	2. This player is not currently signed in and online
 	// on Swtich, always show the login UI even if a Lan match
 	if (
-#if !PLATFORM_SWITCH
-		bIsOnline &&
+#if PLATFORM_SWITCH
+		bCanShowUI &&
+#else
+		OnlineMode == EOnlineMode::Online &&
 #endif
 		( bFoundExistingPlayer || !bIsPlayerOnline ) )
 	{
@@ -328,7 +330,7 @@ void SShooterSplitScreenLobby::ConditionallyReadyPlayer( const int ControllerId,
 
 		if ( bCanShowUI && ExternalUI.IsValid() )
 		{
-			ExternalUI->ShowLoginUI( ControllerId, false, FOnLoginUIClosedDelegate::CreateSP( this, &SShooterSplitScreenLobby::HandleLoginUIClosedAndReady ) );
+			ExternalUI->ShowLoginUI( ControllerId, OnlineMode == EOnlineMode::Online, false, FOnLoginUIClosedDelegate::CreateSP( this, &SShooterSplitScreenLobby::HandleLoginUIClosedAndReady ) );
 		}
 
 		return;
@@ -345,7 +347,7 @@ void SShooterSplitScreenLobby::ConditionallyReadyPlayer( const int ControllerId,
 				PendingControllerId = ControllerId;
 				Identity->GetUserPrivilege(
 					*UniqueNetId,
-					bIsOnline ? EUserPrivileges::CanPlayOnline : EUserPrivileges::CanPlay,
+					OnlineMode != EOnlineMode::Offline ? EUserPrivileges::CanPlayOnline : EUserPrivileges::CanPlay,
 					IOnlineIdentity::FOnGetUserPrivilegeCompleteDelegate::CreateSP(this, &SShooterSplitScreenLobby::OnUserCanPlay));
 			}
 		}
@@ -491,7 +493,8 @@ bool SShooterSplitScreenLobby::IsUniqueIdOnline( const FUniqueNetId& UniqueId ) 
 
 FReply SShooterSplitScreenLobby::OnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
 {
-	if (GetGameInstance() == nullptr)
+	const UShooterGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance == nullptr)
 	{
 		return FReply::Unhandled();
 	}
@@ -507,17 +510,17 @@ FReply SShooterSplitScreenLobby::OnKeyDown(const FGeometry& MyGeometry, const FK
 		if ( ExistingPlayer != NULL )
 		{
 			// See if this is the initial user
-			if ( ExistingPlayer == GetGameInstance()->GetFirstGamePlayer() )
+			if ( ExistingPlayer == GameInstance->GetFirstGamePlayer() )
 			{
 				// If this is the initial user, start the game
-				if ( !bIsOnline || ConfirmSponsorsSatisfied() )
+				if (GameInstance->GetOnlineMode() != EOnlineMode::Online || ConfirmSponsorsSatisfied() )
 				{
 					return MasterUserPlay.Execute();
 				}
 				else
 				{
 					// Show warning that the guest needs the sponsor
-					UShooterGameViewportClient * ShooterViewport = Cast<UShooterGameViewportClient>(GetGameInstance()->GetGameViewportClient());
+					UShooterGameViewportClient * ShooterViewport = Cast<UShooterGameViewportClient>(GameInstance->GetGameViewportClient());
 
 					if ( ShooterViewport != NULL )
 					{
@@ -547,6 +550,10 @@ FReply SShooterSplitScreenLobby::OnKeyDown(const FGeometry& MyGeometry, const FK
 	else if ((Key == EKeys::Gamepad_FaceButton_Top) && !InKeyEvent.IsRepeat())
 	{
 		GEngine->DeferredCommands.Add(TEXT("Npad.ConnectUI"));
+	}
+	else if (GameInstance->GetOnlineMode() != EOnlineMode::Online && (Key == EKeys::Gamepad_FaceButton_Left) && !InKeyEvent.IsRepeat())
+	{
+		ConditionallyReadyPlayer(UserIndex, false);
 	}
 #endif
 	else if (Key == EKeys::Escape || Key == EKeys::Virtual_Back || Key == EKeys::Global_Back)
@@ -581,13 +588,43 @@ void SShooterSplitScreenLobby::OnFocusLost( const FFocusEvent& InFocusEvent )
 
 void SShooterSplitScreenLobby::HandleLoginUIClosedAndReady( TSharedPtr<const FUniqueNetId> UniqueId, const int UserIndex )
 {
+	const UShooterGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance == nullptr)
+	{
+		return;
+	}
+
+	EOnlineMode OnlineMode = GameInstance->GetOnlineMode();
+
 	// If a player signed in, UniqueId will be valid, and we can place him in the open slot.
 	if ( UniqueId.IsValid() )
 	{
-		if ( !bIsOnline || IsUniqueIdOnline( *UniqueId ) )
+		if ( OnlineMode != EOnlineMode::Online || IsUniqueIdOnline( *UniqueId ) )
 		{
 			ConditionallyReadyPlayer( UserIndex, false );
 		}
+		else if (!IsUniqueIdOnline(*UniqueId))
+		{
+			if (OnlineMode == EOnlineMode::Online)
+			{
+				OnLoginCompleteDelegateHandle = IOnlineSubsystem::Get()->GetIdentityInterface()->AddOnLoginCompleteDelegate_Handle(UserIndex, FOnLoginCompleteDelegate::CreateRaw(this, &SShooterSplitScreenLobby::OnLoginComplete));
+				Online::GetIdentityInterface()->Login(UserIndex, FOnlineAccountCredentials());
+			}
+			else
+			{
+				ConditionallyReadyPlayer(UserIndex, false);
+			}
+		}
+	}
+}
+
+void SShooterSplitScreenLobby::OnLoginComplete(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error)
+{
+	IOnlineSubsystem::Get()->GetIdentityInterface()->ClearOnLoginCompleteDelegate_Handle(LocalUserNum, OnLoginCompleteDelegateHandle);
+
+	if (bWasSuccessful && IsUniqueIdOnline(*GetGameInstance()->GetUniqueNetIdFromControllerId(LocalUserNum)))
+	{
+		ConditionallyReadyPlayer(LocalUserNum, false);
 	}
 }
 
@@ -607,5 +644,18 @@ FText SShooterSplitScreenLobby::GetPlayFindText() const
 {
 	return bIsJoining ? PressToFindText : PressToStartMatchText;
 }
+
+#if PLATFORM_SWITCH
+FText SShooterSplitScreenLobby::GetPlayAsGuestText() const
+{
+	const UShooterGameInstance* GameInstance = GetGameInstance();
+	if (GameInstance == nullptr)
+	{
+		return FText();
+	}
+
+	return GameInstance->GetOnlineMode() != EOnlineMode::Offline ? FText() : PlayAsGuestText;
+}
+#endif
 
 #undef LOCTEXT_NAMESPACE

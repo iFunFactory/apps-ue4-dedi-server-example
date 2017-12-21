@@ -103,6 +103,9 @@ protected:
 	TSharedPtr<class FShooterMenuItem> HostLANItem;
 	TSharedPtr<class FShooterMenuItem> JoinLANItem;	
 
+	/** Dedicated Server Option */
+	TSharedPtr<class FShooterMenuItem> DedicatedItem;
+
 	/** Record demo option */
 	TSharedPtr<class FShooterMenuItem> RecordDemoItem;
 
@@ -137,6 +140,15 @@ protected:
 	/** called when user chooses to start matchmaking. */
 	void OnQuickMatchSelected();
 
+	/** called when user chooses to start matchmaking, but a login is required first. */
+	void OnQuickMatchSelectedLoginRequired();
+
+	/** Called when user chooses split screen for the "host online" mode. Does some validation before moving on the split screen menu widget. */
+	void OnSplitScreenSelectedHostOnlineLoginRequired();
+
+	/** Called when user chooses split screen for the "host online" mode.*/
+	void OnSplitScreenSelectedHostOnline();
+
 	/** called when user chooses split screen.  Goes to the split screen setup screen.  Hides menu widget*/
 	void OnSplitScreenSelected();
 
@@ -161,6 +173,9 @@ protected:
 	/** lan match option changed callback */
 	void LanMatchChanged(TSharedPtr<FShooterMenuItem> MenuItem, int32 MultiOptionIndex);
 
+	/** dedicated server option changed callback */
+	void DedicatedServerChanged(TSharedPtr<FShooterMenuItem> MenuItem, int32 MultiOptionIndex);
+
 	/** record demo option changed callback */
 	void RecordDemoChanged(TSharedPtr<FShooterMenuItem> MenuItem, int32 MultiOptionIndex);
 
@@ -184,6 +199,15 @@ protected:
 
 	/** Returns true if owning player is online. Displays proper messaging if the user can't play */
 	bool ValidatePlayerForOnlinePlay(ULocalPlayer* LocalPlayer);
+
+	/** Returns true if owning player is signed in to an account. Displays proper messaging if the user can't play */
+	bool ValidatePlayerIsSignedIn(ULocalPlayer* LocalPlayer);
+
+	/** Called when the join menu option is chosen */
+	void OnJoinSelected();
+
+	/** Join server, but login necessary first. */
+	void OnJoinServerLoginRequired();
 
 	/** Join server */
 	void OnJoinServer();
@@ -231,7 +255,7 @@ protected:
 	void CleanupOnlinePrivilegeTask();
 
 	/** Delegate function executed after checking privileges for hosting an online game */
-	void OnUserCanPlayOnlineHost(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, uint32 PrivilegeResults);
+	void OnUserCanPlayHostOnline(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, uint32 PrivilegeResults);
 
 	/** Delegate function executed after checking privileges for joining an online game */
 	void OnUserCanPlayOnlineJoin(const FUniqueNetId& UserId, EUserPrivileges::Type Privilege, uint32 PrivilegeResults);
@@ -244,6 +268,15 @@ protected:
 
 	/** Delegate function executed when the quick match async cancel operation is complete */
 	void OnCancelMatchmakingComplete(FName SessionName, bool bWasSuccessful);
+
+	/** Delegate function executed when login completes before an online match is created */
+	void OnLoginCompleteHostOnline(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
+
+	/** Delegate function executed when login completes before an online match is joined */
+	void OnLoginCompleteJoin(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
+
+	/** Delegate function executed when login completes before quickmatch is started */
+	void OnLoginCompleteQuickmatch(int32 LocalUserNum, bool bWasSuccessful, const FUniqueNetId& UserId, const FString& Error);
 
 	/** Delegate for canceling matchmaking */
 	FOnCancelMatchmakingCompleteDelegate OnCancelMatchmakingCompleteDelegate;
@@ -280,6 +313,9 @@ protected:
 	/** Was input used to cancel the search request for quickmatch? */
 	bool bUsedInputToCancelQuickmatchSearch;
 
+	/** Dedicated server? */
+	bool bIsDedicatedServer;
+
 	/** used for displaying the quickmatch confirmation dialog when a quickmatch to join is not found */
 	TSharedPtr<class SShooterConfirmationDialog> QuickMatchFailureWidget;
 
@@ -305,4 +341,5 @@ protected:
 
 	FDelegateHandle OnMatchmakingCompleteDelegateHandle;
 	FDelegateHandle OnCancelMatchmakingCompleteDelegateHandle;
+	FDelegateHandle OnLoginCompleteDelegateHandle;
 };

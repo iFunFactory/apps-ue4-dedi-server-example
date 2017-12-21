@@ -11,6 +11,13 @@
 
 #define LOCTEXT_NAMESPACE "ShooterGame.HUD.Menu"
 
+#if PLATFORM_SWITCH
+#	define FRIENDS_SUPPORTED 0
+#else
+#	define FRIENDS_SUPPORTED 1
+#endif
+
+
 void FShooterIngameMenu::Construct(ULocalPlayer* _PlayerOwner)
 {
 	PlayerOwner = _PlayerOwner;
@@ -52,7 +59,9 @@ void FShooterIngameMenu::Construct(ULocalPlayer* _PlayerOwner)
 
 		MenuHelper::AddExistingMenuItem(RootMenuItem, ShooterOptions->CheatsItem.ToSharedRef());
 		MenuHelper::AddExistingMenuItem(RootMenuItem, ShooterOptions->OptionsItem.ToSharedRef());
-		if (GameInstance && GameInstance->GetIsOnline())
+
+#if FRIENDS_SUPPORTED
+		if (GameInstance && GameInstance->GetOnlineMode() == EOnlineMode::Online)
 		{
 #if !PLATFORM_XBOXONE
 			ShooterFriends = MakeShareable(new FShooterFriends());
@@ -75,6 +84,7 @@ void FShooterIngameMenu::Construct(ULocalPlayer* _PlayerOwner)
 			ShowInvitesItem->OnConfirmMenuItem.BindRaw(this, &FShooterIngameMenu::OnShowInviteUI);		
 #endif
 		}
+#endif
 
 		if (FSlateApplication::Get().SupportsSystemHelp())
 		{

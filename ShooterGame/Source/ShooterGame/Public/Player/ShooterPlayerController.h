@@ -96,6 +96,9 @@ public:
 	UFUNCTION(exec)
 	void SetGodMode(bool bEnable);
 
+	/** sets the produce force feedback flag. */
+	void SetIsVibrationEnabled(bool bEnable);
+
 	/** get infinite ammo cheat */
 	bool HasInfiniteAmmo() const;
 
@@ -107,6 +110,9 @@ public:
 
 	/** get gode mode cheat */
 	bool HasGodMode() const;
+
+	/** should produce force feedback? */
+	bool IsVibrationEnabled() const;
 
 	/** check if gameplay related actions (movement, weapon usage, etc) are allowed right now */
 	bool IsGameInputAllowed() const;
@@ -140,6 +146,9 @@ public:
 	virtual void InitInputSystem() override;
 
 	virtual bool SetPause(bool bPause, FCanUnpause CanUnpauseDelegate = FCanUnpause()) override;
+
+	UFUNCTION(BlueprintCallable, Category = "Pawn")
+	virtual FVector GetFocalLocation() const override;
 
 	// End APlayerController interface
 
@@ -195,6 +204,9 @@ protected:
 	UPROPERTY(Transient, Replicated)
 	uint8 bGodMode : 1;
 
+	/** should produce force feedback? */
+	uint8 bIsVibrationEnabled : 1;
+
 	/** if set, gameplay related actions (movement, weapn usage, etc) are allowed */
 	uint8 bAllowGameActions : 1;
 
@@ -219,9 +231,6 @@ protected:
 
 	/** after all game elements are created */
 	virtual void PostInitializeComponents() override;
-
-protected:
-	virtual void BeginPlay() override;
 
 public:
 	virtual void TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction) override;

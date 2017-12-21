@@ -117,6 +117,12 @@ protected:
 	 */
 	void OnNoMatchesAvailable();
 
+
+	/**
+	 * Called when this instance is starting up as a dedicated server
+	 */
+	virtual void RegisterServer() override;
+
 	/* 
 	 * Event triggered when a presence session is created
 	 *

@@ -67,9 +67,9 @@ void AShooterGameSession::HandleMatchHasStarted()
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
 		if (Sessions.IsValid())
 		{
-			UE_LOG(LogOnlineGame, Log, TEXT("Starting session %s on server"), *GameSessionName.ToString());
+			UE_LOG(LogOnlineGame, Log, TEXT("Starting session %s on server"), *FName(NAME_GameSession).ToString());
 			OnStartSessionCompleteDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
-			Sessions->StartSession(GameSessionName);
+			Sessions->StartSession(NAME_GameSession);
 		}
 	}
 }
@@ -98,8 +98,8 @@ void AShooterGameSession::HandleMatchHasEnded()
 			}
 
 			// server is handled here
-			UE_LOG(LogOnlineGame, Log, TEXT("Ending session %s on server"), *GameSessionName.ToString() );
-			Sessions->EndSession(GameSessionName);
+			UE_LOG(LogOnlineGame, Log, TEXT("Ending session %s on server"), *FName(NAME_GameSession).ToString() );
+			Sessions->EndSession(NAME_GameSession);
 		}
 	}
 }
@@ -117,8 +117,8 @@ bool AShooterGameSession::IsBusy() const
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
 		if (Sessions.IsValid())
 		{
-			EOnlineSessionState::Type GameSessionState = Sessions->GetSessionState(GameSessionName);
-			EOnlineSessionState::Type PartySessionState = Sessions->GetSessionState(PartySessionName);
+			EOnlineSessionState::Type GameSessionState = Sessions->GetSessionState(NAME_GameSession);
+			EOnlineSessionState::Type PartySessionState = Sessions->GetSessionState(NAME_PartySession);
 			if (GameSessionState != EOnlineSessionState::NoSession || PartySessionState != EOnlineSessionState::NoSession)
 			{
 				return true;
@@ -217,7 +217,12 @@ bool AShooterGameSession::HostSession(TSharedPtr<const FUniqueNetId> UserId, FNa
 			HostSettings->Set(SETTING_MATCHING_HOPPER, FString("TeamDeathmatch"), EOnlineDataAdvertisementType::DontAdvertise);
 			HostSettings->Set(SETTING_MATCHING_TIMEOUT, 120.0f, EOnlineDataAdvertisementType::ViaOnlineService);
 			HostSettings->Set(SETTING_SESSION_TEMPLATE_NAME, FString("GameSession"), EOnlineDataAdvertisementType::DontAdvertise);
+
+#if !PLATFORM_SWITCH
+			// On Switch, we don't have room for this in the session data (and it's not used anyway when searching), so there's no need to add it.
+			// Can be readded if the buffer size increases.
 			HostSettings->Set(SEARCH_KEYWORDS, CustomMatchKeyword, EOnlineDataAdvertisementType::ViaOnlineService);
+#endif
 
 			OnCreateSessionCompleteDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
 			return Sessions->CreateSession(*CurrentSessionParams.UserId, CurrentSessionParams.SessionName, *HostSettings);
@@ -227,7 +232,7 @@ bool AShooterGameSession::HostSession(TSharedPtr<const FUniqueNetId> UserId, FNa
 	else 
 	{
 		// Hack workflow in development
-		OnCreatePresenceSessionComplete().Broadcast(GameSessionName, true);
+		OnCreatePresenceSessionComplete().Broadcast(NAME_GameSession, true);
 		return true;
 	}
 #endif
@@ -427,4 +432,26 @@ bool AShooterGameSession::TravelToSession(int32 ControllerId, FName InSessionNam
 #endif //!UE_BUILD_SHIPPING
 
 	return false;
+}
+
+void AShooterGameSession::RegisterServer()
+{
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub)
+	{
+		IOnlineSessionPtr SessionInt = Online::GetSessionInterface();
+		if (SessionInt.IsValid())
+		{
+			TSharedPtr<class FShooterOnlineSessionSettings> ShooterHostSettings = MakeShareable(new FShooterOnlineSessionSettings(false, false, 16));
+			ShooterHostSettings->Set(SETTING_MATCHING_HOPPER, FString("TeamDeathmatch"), EOnlineDataAdvertisementType::DontAdvertise);
+			ShooterHostSettings->Set(SETTING_MATCHING_TIMEOUT, 120.0f, EOnlineDataAdvertisementType::ViaOnlineService);
+			ShooterHostSettings->Set(SETTING_SESSION_TEMPLATE_NAME, FString("GameSession"), EOnlineDataAdvertisementType::DontAdvertise);
+			ShooterHostSettings->Set(SETTING_MAPNAME, GetWorld()->GetMapName(), EOnlineDataAdvertisementType::ViaOnlineService);
+			ShooterHostSettings->bAllowInvites = true;
+			ShooterHostSettings->bIsDedicated = true;
+			HostSettings = ShooterHostSettings;
+			OnCreateSessionCompleteDelegateHandle = SessionInt->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
+			SessionInt->CreateSession(0, NAME_GameSession, *HostSettings);
+		}
+	}
 }

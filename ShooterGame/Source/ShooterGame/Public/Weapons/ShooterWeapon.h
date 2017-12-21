@@ -2,7 +2,17 @@
 
 #pragma once
 
+#include "GameFramework/Actor.h"
+#include "Engine/Canvas.h" // for FCanvasIcon
 #include "ShooterWeapon.generated.h"
+
+class UAnimMontage;
+class AShooterCharacter;
+class UAudioComponent;
+class UParticleSystemComponent;
+class UCameraShake;
+class UForceFeedbackEffect;
+class USoundCue;
 
 namespace EWeaponState
 {

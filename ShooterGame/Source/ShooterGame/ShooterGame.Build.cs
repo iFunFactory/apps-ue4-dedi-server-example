@@ -4,7 +4,7 @@ using UnrealBuildTool;
 
 public class ShooterGame : ModuleRules
 {
-	public ShooterGame(TargetInfo Target)
+	public ShooterGame(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PrivateIncludePaths.AddRange(
 			new string[] { 
@@ -37,9 +37,10 @@ public class ShooterGame : ModuleRules
 				"SlateCore",
 				"ShooterGameLoadingScreen",
 				"Json",
+				"ApplicationCore",
 				"Http",
 				"FunapiDedicatedServer"
-            }
+			}
 		);
 
 		if (Target.Type != TargetRules.TargetType.Server && Target.Platform != UnrealTargetPlatform.Linux)

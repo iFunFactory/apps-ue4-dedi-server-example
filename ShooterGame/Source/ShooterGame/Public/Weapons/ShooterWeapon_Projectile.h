@@ -3,6 +3,7 @@
 #pragma once
 
 #include "ShooterWeapon.h"
+#include "GameFramework/DamageType.h" // for UDamageType::StaticClass()
 #include "ShooterWeapon_Projectile.generated.h"
 
 USTRUCT()

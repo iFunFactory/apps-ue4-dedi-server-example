@@ -14,6 +14,7 @@ void UShooterPersistentUser::SetToDefaults()
 {
 	bIsDirty = false;
 
+	bVibrationOpt = true;
 	bInvertedYAxis = false;
 	AimSensitivity = 1.0f;
 	Gamma = 2.2f;
@@ -200,6 +201,14 @@ void UShooterPersistentUser::TellInputAboutKeybindings()
 int32 UShooterPersistentUser::GetUserIndex() const
 {
 	return UserIndex;
+}
+
+void UShooterPersistentUser::SetVibration(bool bVibration)
+{
+	bIsDirty |= bVibrationOpt != bVibration;
+
+	bVibrationOpt = bVibration;
+
 }
 
 void UShooterPersistentUser::SetInvertedYAxis(bool bInvert)

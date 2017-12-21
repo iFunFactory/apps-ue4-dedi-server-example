@@ -2,9 +2,12 @@
 
 #pragma once
 
+#include "GameFramework/Actor.h"
 #include "ShooterWeapon_Projectile.h"
-
 #include "ShooterProjectile.generated.h"
+
+class UProjectileMovementComponent;
+class USphereComponent;
 
 // 
 UCLASS(Abstract, Blueprintable)

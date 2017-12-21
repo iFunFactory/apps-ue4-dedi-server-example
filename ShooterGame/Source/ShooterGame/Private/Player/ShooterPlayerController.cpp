@@ -85,11 +85,6 @@ void AShooterPlayerController::PostInitializeComponents()
 	ShooterFriendUpdateTimer = 0;
 }
 
-void AShooterPlayerController::BeginPlay()
-{
-	Super::BeginPlay();	
-}
-
 void AShooterPlayerController::TickActor(float DeltaTime, enum ELevelTick TickType, FActorTickFunction& ThisTickFunction)
 {
 	Super::TickActor(DeltaTime, TickType, ThisTickFunction);
@@ -156,12 +151,15 @@ void AShooterPlayerController::SetPlayer( UPlayer* InPlayer )
 {
 	Super::SetPlayer( InPlayer );
 
-	//Build menu only after game is initialized
-	ShooterIngameMenu = MakeShareable(new FShooterIngameMenu());
-	ShooterIngameMenu->Construct(Cast<ULocalPlayer>(Player));
+	if (ULocalPlayer* const LocalPlayer = Cast<ULocalPlayer>(Player))
+	{
+		//Build menu only after game is initialized
+		ShooterIngameMenu = MakeShareable(new FShooterIngameMenu());
+		ShooterIngameMenu->Construct(Cast<ULocalPlayer>(Player));
 
-	FInputModeGameOnly InputMode;
-	SetInputMode(InputMode);
+		FInputModeGameOnly InputMode;
+		SetInputMode(InputMode);
+	}
 }
 
 void AShooterPlayerController::QueryAchievements()
@@ -262,7 +260,7 @@ bool AShooterPlayerController::FindDeathCameraSpot(FVector& CameraLocation, FRot
 
 	const float YawOffsets[] = { 0.0f, -180.0f, 90.0f, -90.0f, 45.0f, -45.0f, 135.0f, -135.0f };
 	const float CameraOffset = 600.0f;
-	FCollisionQueryParams TraceParams(TEXT("DeathCamera"), true, GetPawn());
+	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(DeathCamera), true, GetPawn());
 
 	FHitResult HitResult;
 	for (int32 i = 0; i < ARRAY_COUNT(YawOffsets); i++)
@@ -542,6 +540,11 @@ void AShooterPlayerController::SetGodMode(bool bEnable)
 	bGodMode = bEnable;
 }
 
+void AShooterPlayerController::SetIsVibrationEnabled(bool bEnable)
+{
+	bIsVibrationEnabled = bEnable;
+}
+
 void AShooterPlayerController::ClientGameStarted_Implementation()
 {
 	bAllowGameActions = true;
@@ -585,7 +588,7 @@ void AShooterPlayerController::ClientGameStarted_Implementation()
 			// Online matches require the MultiplayerRoundStart event as well
 			UShooterGameInstance* SGI = GetWorld() != NULL ? Cast<UShooterGameInstance>(GetWorld()->GetGameInstance()) : NULL;
 
-			if (SGI->GetIsOnline())
+			if (SGI->GetOnlineMode() == EOnlineMode::Online)
 			{
 				FOnlineEventParms MultiplayerParams;
 
@@ -749,7 +752,7 @@ void AShooterPlayerController::ClientSendRoundEndEvent_Implementation(bool bIsWi
 
 			// Online matches require the MultiplayerRoundEnd event as well
 			UShooterGameInstance* SGI = GetWorld() != NULL ? Cast<UShooterGameInstance>(GetWorld()->GetGameInstance()) : NULL;
-			if (SGI->GetIsOnline())
+			if (SGI->GetOnlineMode() == EOnlineMode::Online)
 			{
 				FOnlineEventParms MultiplayerParams;
 
@@ -880,6 +883,11 @@ bool AShooterPlayerController::HasGodMode() const
 	return bGodMode;
 }
 
+bool AShooterPlayerController::IsVibrationEnabled() const
+{
+	return bIsVibrationEnabled;
+}
+
 bool AShooterPlayerController::IsGameInputAllowed() const
 {
 	return bAllowGameActions && !bCinematicMode;
@@ -978,6 +986,20 @@ bool AShooterPlayerController::SetPause(bool bPause, FCanUnpause CanUnpauseDeleg
 	}
 
 	return Result;
+}
+
+FVector AShooterPlayerController::GetFocalLocation() const
+{
+	const AShooterCharacter* ShooterCharacter = Cast<AShooterCharacter>(GetPawn());
+
+	// On death we want to use the player's death cam location rather than the location of where the pawn is at the moment
+	// This guarantees that the clients see their death cam correctly, as their pawns have delayed destruction.
+	if (ShooterCharacter && ShooterCharacter->bIsDying)
+	{
+		return GetSpawnLocation();
+	}
+
+	return Super::GetFocalLocation();
 }
 
 void AShooterPlayerController::ShowInGameMenu()

@@ -143,7 +143,7 @@ void SShooterScoreboardWidget::StoreTalkingPlayerData(const FUniqueNetId& Player
 	}
 	else
 	{
-		PlayersTalkingThisFrame.Add(TPairInitializer<TSharedRef<const FUniqueNetId>, bool>(PlayerId.AsShared(), bIsTalking));
+		PlayersTalkingThisFrame.Emplace(PlayerId.AsShared(), bIsTalking);
 	}
 }
 

@@ -13,7 +13,8 @@ public:
 	SLATE_BEGIN_ARGS(SShooterMenuWidget)
 	: _PlayerOwner()
 	, _IsGameMenu(false)
-	{}
+	{
+	}
 
 	/** weak pointer to the parent HUD base */
 	SLATE_ARGUMENT(TWeakObjectPtr<ULocalPlayer>, PlayerOwner)
