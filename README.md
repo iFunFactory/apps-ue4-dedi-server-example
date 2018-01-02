@@ -32,6 +32,8 @@ github 의 용량 제한 문제로 Content 폴더가 빠져있습니다. 예제 
     - 데디케이티드 서버 매니저 주소
 - **FunapiHeartbeat**
     - Heartbeat HTTP POST 를 보내는 주기(초), 0 이거나 없으면 보내지 않습니다
+- **FunapiVersion**
+    - 커맨드라인에 이 옵션이 들어있을 경우, **데디케이트 서버**는 처음 실행될 때 **데디케이트 서버 매니저**에 버전 정보를 전송하고 종료합니다
 
 ### 게임 클라이언트
 ```
@@ -98,15 +100,17 @@ if (Target.Type != TargetRules.TargetType.Server && Target.Platform != UnrealTar
 ```c++
 bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field);
 bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field, const FString &heartbeat_field);
+bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field, const FString &heartbeat_field, const FString &version_field);
 
 fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get());
 fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get(), "FunapiMatchID", "FunapiManagerServer");
 fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get(), "FunapiMatchID", "FunapiManagerServer", "FunapiHeartbeat");
+fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get(), "FunapiMatchID", "FunapiManagerServer", "FunapiHeartbeat", "FunapiVersion");
 ```
 
 엔진 기본 커맨드 라인이 앞으로 바뀔 수 있기 때문에 고정된 이름을 사용하지 않고 파라미터를 받도록 합니다.
 
-필요한 필드가 없으면 false 를 리턴하고 필드가 다 있으면 true를 리턴합니다.
+FunapiMatchID 필드와 FunapiManagerServer 필드가 없으면 false 를 리턴하고 있으면 true를 리턴합니다.
 
 - **cmd**
     - 서버의 커맨드 라인 명령
@@ -114,6 +118,24 @@ fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get(), "FunapiMatc
     - 매치 아이디 필드 이름, 기본값 "FunapiMatchID"
 - **manager_server_field**
     - 파이썬 매니저 서버의 주소, 기본값 "FunapiManagerServer"
+- **heartbeat_field**
+    - Heart Beat 을 보내는 주기(초), 기본값 "FunapiHeartbeat"
+- **version_field**
+    - 버전 정보를 보내고 서버를 종료하는 기능을 사용, 기본값 "FunapiVersion"
+    - 이 필드가 존재하면 다른 GET, POST 요청을 보내지 않습니다
+
+```c++
+void SetVersionInfo(const FString &json_string);
+
+fun::FunapiDedicatedServer::SetVersionInfo(FString("{ \"version\":\"1.2.3.2500\"}"));
+```
+
+커맨드 라인에 버전 정보 필드가 있는 경우 (기본값 -FunapiVersion)
+
+이 함수를 통해 설정된 JSON 스트링을 파이썬 매니저 서버에 전송하고 서버를 종료합니다
+
+이 값이 설정되어 있더라도 버전 정보 필드가 설정되어 있지 않으면 전송하지 않고 종료도 하지 않습니다
+
 
 ```c++
 void GetGameInfo(const TFunction<void(FHttpResponsePtr response)> &completion_handler);

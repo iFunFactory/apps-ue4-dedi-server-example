@@ -352,6 +352,7 @@ void UShooterGameInstance::StartGameInstance()
 
   if (IsDedicatedServerInstance()) {
     fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get());
+    fun::FunapiDedicatedServer::SetVersionInfo(FString("{ \"version\":\"1.2.3.2500\"}"));
     fun::FunapiDedicatedServer::GetGameInfo(func);
   }
   else {
@@ -361,7 +362,7 @@ void UShooterGameInstance::StartGameInstance()
   }
 }
 
-bool UShooterGameInstance::TestFunapiServerConnect() 
+bool UShooterGameInstance::TestFunapiServerConnect()
 {
 #if WITH_FUNAPI
   const FString funapi_server_field = "FunapiServer";

@@ -1,4 +1,4 @@
-// Copyright (C) 2013-2017 iFunFactory Inc. All Rights Reserved.
+// Copyright (C) 2013-2018 iFunFactory Inc. All Rights Reserved.
 //
 // This work is confidential and proprietary to iFunFactory Inc. and
 // must not be used, disclosed, copied, or distributed without the prior
@@ -12,6 +12,7 @@ namespace fun
   namespace FunapiDedicatedServer
   {
     static FString funapi_manager_server_;
+    static FString funapi_manager_server_with_match_id_;
     static TMap<FString, FString> auth_map_;
     static TMap<FString, FString> user_data_map_;
     static FString match_data_string_;
@@ -19,6 +20,8 @@ namespace fun
     static double pending_users_seconds_ = 5;
     static TFunction<void(const FString &uid, const FString &json_string)> user_data_handler_;
     static TFunction<void(const FString &json_string)> match_data_handler_;
+    static FString version_info_string_;
+    static bool use_post_version_and_exit_ = false;
 
     FString GetUserDataJsonString(const FString &uid)
     {
@@ -186,6 +189,35 @@ namespace fun
       (new FAutoDeleteAsyncTask<FAsyncPendingUsersTask>)->StartBackgroundTask();
     }
 
+    void PostVersion();
+    bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field, const FString &heartbeat_field, const FString &version_field)
+    {
+      UE_LOG(LogFunapiDedicatedServer, Log, TEXT("version_field is '%s'"), *version_field);
+
+      bool ret = false;
+
+      if (ParseConsoleCommand(cmd, match_id_field, manager_server_field, heartbeat_field))
+      {
+        ret = true;
+      }
+
+      if (FParse::Param(cmd, *version_field))
+      {
+        use_post_version_and_exit_ = true;
+        UE_LOG(LogFunapiDedicatedServer, Log, TEXT("version_field is true"));
+      }
+      else {
+        use_post_version_and_exit_ = false;
+        UE_LOG(LogFunapiDedicatedServer, Log, TEXT("version_field is false"));
+      }
+
+      if (use_post_version_and_exit_ && ret) {
+        PostVersion();
+      }
+
+      return ret;
+    }
+
     bool ParseConsoleCommand(const TCHAR* cmd, const FString &match_id_field, const FString &manager_server_field, const FString &heartbeat_field)
     {
       if (ParseConsoleCommand(cmd, match_id_field, manager_server_field))
@@ -236,8 +268,9 @@ namespace fun
       }
 
       if (ret) {
-        funapi_manager_server_ = manager_server + "/match/" + match_id + "/";
-        UE_LOG(LogFunapiDedicatedServer, Log, TEXT("Dedicated server manager server : %s"), *funapi_manager_server_);
+        funapi_manager_server_ = manager_server + "/";
+        funapi_manager_server_with_match_id_ = manager_server + "/match/" + match_id + "/";
+        UE_LOG(LogFunapiDedicatedServer, Log, TEXT("Dedicated server manager server : %s"), *funapi_manager_server_with_match_id_);
 
         AsyncPendingUsers();
       }
@@ -247,19 +280,26 @@ namespace fun
 
     bool ParseConsoleCommand(const TCHAR* cmd)
     {
-      return ParseConsoleCommand(cmd, "FunapiMatchID", "FunapiManagerServer", "FunapiHeartbeat");
+      return ParseConsoleCommand(cmd, "FunapiMatchID", "FunapiManagerServer", "FunapiHeartbeat", "FunapiVersion");
     }
 
     void Request(const FString &verb,
       const FString &path,
       const FString &json_string,
-      const TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> &completion_handler)
+      const TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> &completion_handler,
+      const bool use_match_id = true)
     {
       if (funapi_manager_server_.IsEmpty()) {
         return;
       }
 
-      FString server_url = funapi_manager_server_ + path;
+      FString server_url;
+      if (use_match_id) {
+        server_url = funapi_manager_server_with_match_id_ + path;
+      }
+      else {
+        server_url = funapi_manager_server_ + path;
+      }
 
       /*
       // test code
@@ -309,6 +349,11 @@ namespace fun
 
     void Get(const FString &path, const FString &json_string, const TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> &completion_handler)
     {
+      if (use_post_version_and_exit_) {
+        completion_handler(nullptr, nullptr, false);
+        return;
+      }
+
       Request("GET", path, json_string, completion_handler);
     }
 
@@ -349,9 +394,13 @@ namespace fun
       GetGameInfo(handler);
     }
 
-    void Post(const FString &path, const FString &json_string, const TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> &completion_handler)
+    void Post(const FString &path, const FString &json_string, const TFunction<void(FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)> &completion_handler, const bool use_match_id)
     {
-      Request("POST", path, json_string, completion_handler);
+      if (use_post_version_and_exit_ && use_match_id) {
+        return;
+      }
+
+      Request("POST", path, json_string, completion_handler, use_match_id);
     }
 
     void PostReady()
@@ -368,6 +417,19 @@ namespace fun
           FGenericPlatformMisc::RequestExit(false);
         }
       });
+    }
+
+    void PostVersion()
+    {
+      if (use_post_version_and_exit_ && version_info_string_.IsEmpty() == false) {
+        Post("server/version", version_info_string_,
+          [](FHttpRequestPtr request, FHttpResponsePtr response, bool succeed)
+        {
+          if (succeed) {
+            FGenericPlatformMisc::RequestExit(false);
+          }
+        }, false);
+      }
     }
 
     void PostHeartbeat() {
@@ -478,6 +540,15 @@ namespace fun
     void PostCustomCallback(const FString &json_string)
     {
       Post("callback", json_string);
+    }
+
+    void SetVersionInfo(const FString &json_string)
+    {
+      version_info_string_ = json_string;
+
+      if (use_post_version_and_exit_) {
+        PostVersion();
+      }
     }
   }
 }
