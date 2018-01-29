@@ -10,7 +10,7 @@ namespace fun {
   namespace FunapiDedicatedServer {
     extern FUNAPIDEDICATEDSERVER_API FString GetUserDataJsonString(const FString &uid);
     extern FUNAPIDEDICATEDSERVER_API FString GetMatchDataJsonString();
-    extern FUNAPIDEDICATEDSERVER_API void SetVersionInfo(const FString &json_string);
+    extern FUNAPIDEDICATEDSERVER_API void SetVersionInfo(const FString &version_string);
     extern FUNAPIDEDICATEDSERVER_API void SetUserDataCallback(const TFunction<void(const FString &uid, const FString &json_string)> &handler);
     extern FUNAPIDEDICATEDSERVER_API void SetMatchDataCallback(const TFunction<void(const FString &json_string)> &handler);
     extern FUNAPIDEDICATEDSERVER_API bool ParseConsoleCommand(const TCHAR* cmd);
