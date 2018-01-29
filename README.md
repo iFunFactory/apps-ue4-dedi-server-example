@@ -125,14 +125,14 @@ FunapiMatchID 필드와 FunapiManagerServer 필드가 없으면 false 를 리턴
     - 이 필드가 존재하면 다른 GET, POST 요청을 보내지 않습니다
 
 ```c++
-void SetVersionInfo(const FString &json_string);
+void SetVersionInfo(const FString &version_string);
 
-fun::FunapiDedicatedServer::SetVersionInfo(FString("{ \"version\":\"1.2.3.2500\"}"));
+fun::FunapiDedicatedServer::SetVersionInfo(FString("1.2.3.2500"));
 ```
 
 커맨드 라인에 버전 정보 필드가 있는 경우 (기본값 -FunapiVersion)
 
-이 함수를 통해 설정된 JSON 스트링을 파이썬 매니저 서버에 전송하고 서버를 종료합니다
+이 함수를 통해 설정된 버전 스트링을 파이썬 매니저 서버에 전송하고 서버를 종료합니다
 
 이 값이 설정되어 있더라도 버전 정보 필드가 설정되어 있지 않으면 전송하지 않고 종료도 하지 않습니다
 

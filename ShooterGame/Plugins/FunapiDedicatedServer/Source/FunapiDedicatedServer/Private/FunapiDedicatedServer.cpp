@@ -542,9 +542,12 @@ namespace fun
       Post("callback", json_string);
     }
 
-    void SetVersionInfo(const FString &json_string)
+    void SetVersionInfo(const FString &version_string)
     {
-      version_info_string_ = json_string;
+      TSharedRef<FJsonObject> json_object = MakeShareable(new FJsonObject);
+      json_object->SetStringField(FString("version"), version_string);
+      TSharedRef<TJsonWriter<TCHAR>> writer = TJsonWriterFactory<TCHAR>::Create(&version_info_string_);
+      FJsonSerializer::Serialize(json_object, writer);
 
       if (use_post_version_and_exit_) {
         PostVersion();

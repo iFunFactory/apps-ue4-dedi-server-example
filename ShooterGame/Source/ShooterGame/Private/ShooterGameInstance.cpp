@@ -352,7 +352,7 @@ void UShooterGameInstance::StartGameInstance()
 
   if (IsDedicatedServerInstance()) {
     fun::FunapiDedicatedServer::ParseConsoleCommand(FCommandLine::Get());
-    fun::FunapiDedicatedServer::SetVersionInfo(FString("{ \"version\":\"1.2.3.2500\"}"));
+    fun::FunapiDedicatedServer::SetVersionInfo(FString("1.2.3.2500"));
     fun::FunapiDedicatedServer::GetGameInfo(func);
   }
   else {
