@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "UI/ShooterHUD.h"
@@ -849,7 +849,7 @@ void AShooterHUD::ShowDeathMessage(class AShooterPlayerState* KillerPlayerState,
 			NewMessage.bKillerIsOwner = MyPlayerState == KillerPlayerState;
 			NewMessage.bVictimIsOwner = MyPlayerState == VictimPlayerState;
 
-			NewMessage.DamageType = Cast<const UShooterDamageType>(KillerDamageType);
+			NewMessage.DamageType = MakeWeakObjectPtr(const_cast<UShooterDamageType*>(Cast<const UShooterDamageType>(KillerDamageType)));
 			NewMessage.HideTime = GetWorld()->GetTimeSeconds() + MessageDuration;
 
 			DeathMessages.Add(NewMessage);
@@ -1014,7 +1014,7 @@ bool AShooterHUD::ShowScoreboard(bool bEnable, bool bFocus)
 		.Padding(FMargin(50))
 		[
 			SAssignNew(ScoreboardWidget, SShooterScoreboardWidget)
-				.PCOwner(TWeakObjectPtr<APlayerController>(PlayerOwner))
+				.PCOwner(MakeWeakObjectPtr(PlayerOwner))
 				.MatchState(GetMatchState())
 		];
 

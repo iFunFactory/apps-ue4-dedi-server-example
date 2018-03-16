@@ -1,4 +1,4 @@
-﻿// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+﻿// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 /*=============================================================================
 	ShooterGameInstance.cpp
@@ -161,7 +161,7 @@ void UShooterGameInstance::Shutdown()
 
 void UShooterGameInstance::HandleNetworkConnectionStatusChanged(  EOnlineServerConnectionStatus::Type LastConnectionStatus, EOnlineServerConnectionStatus::Type ConnectionStatus )
 {
-	UE_LOG( LogOnlineGame, Warning, TEXT( "UShooterGameInstance::HandleNetworkConnectionStatusChanged: %s" ), EOnlineServerConnectionStatus::ToString( ConnectionStatus ) );
+	UE_LOG( LogOnlineGame, Log, TEXT( "UShooterGameInstance::HandleNetworkConnectionStatusChanged: %s" ), EOnlineServerConnectionStatus::ToString( ConnectionStatus ) );
 
 #if SHOOTER_CONSOLE_UI
 	// If we are disconnected from server, and not currently at (or heading to) the welcome screen
@@ -290,7 +290,13 @@ void UShooterGameInstance::OnPostDemoPlay()
 
 void UShooterGameInstance::HandleDemoPlaybackFailure( EDemoPlayFailure::Type FailureType, const FString& ErrorString )
 {
-	ShowMessageThenGotoState( FText::Format( NSLOCTEXT("UShooterGameInstance", "DemoPlaybackFailedFmt", "Demo playback failed: {0}"), FText::FromString(ErrorString) ), NSLOCTEXT( "DialogButtons", "OKAY", "OK" ), FText::GetEmpty(), ShooterGameInstanceState::MainMenu );
+	if (GetWorld() != nullptr && GetWorld()->WorldType == EWorldType::PIE)
+	{
+		UE_LOG(LogEngine, Warning, TEXT("Demo failed to play back correctly, got error %s"), *ErrorString);
+		return;
+	}
+
+	ShowMessageThenGotoState(FText::Format(NSLOCTEXT("UShooterGameInstance", "DemoPlaybackFailedFmt", "Demo playback failed: {0}"), FText::FromString(ErrorString)), NSLOCTEXT("DialogButtons", "OKAY", "OK"), FText::GetEmpty(), ShooterGameInstanceState::MainMenu);
 }
 
 void UShooterGameInstance::StartGameInstance()

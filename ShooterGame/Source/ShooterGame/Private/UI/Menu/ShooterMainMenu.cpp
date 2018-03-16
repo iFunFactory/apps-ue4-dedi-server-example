@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterMainMenu.h"
@@ -447,19 +447,9 @@ void FShooterMainMenu::Tick(float DeltaSeconds)
 	}
 }
 
-bool FShooterMainMenu::IsTickable() const
-{
-	return true;
-}
-
 TStatId FShooterMainMenu::GetStatId() const
 {
 	RETURN_QUICK_DECLARE_CYCLE_STAT(FShooterMainMenu, STATGROUP_Tickables);
-}
-
-bool FShooterMainMenu::IsTickableWhenPaused() const
-{
-	return true;
 }
 
 void FShooterMainMenu::OnMenuHidden()

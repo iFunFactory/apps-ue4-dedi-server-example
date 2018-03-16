@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterDemoPlaybackMenu.h"
@@ -21,7 +21,7 @@ void FShooterDemoPlaybackMenu::Construct( ULocalPlayer* _PlayerOwner )
 	if ( !GameMenuWidget.IsValid() )
 	{
 		SAssignNew( GameMenuWidget, SShooterMenuWidget )
-			.PlayerOwner( TWeakObjectPtr<ULocalPlayer>( PlayerOwner ) )
+			.PlayerOwner( MakeWeakObjectPtr( PlayerOwner ) )
 			.Cursor( EMouseCursor::Default )
 			.IsGameMenu( true );			
 

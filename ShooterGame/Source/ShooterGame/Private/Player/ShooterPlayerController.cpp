@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "Player/ShooterPlayerController.h"
@@ -239,10 +239,6 @@ void AShooterPlayerController::PawnPendingDestroy(APawn* P)
 
 void AShooterPlayerController::GameHasEnded(class AActor* EndGameFocus, bool bIsWinner)
 {
-	UpdateSaveFileOnGameEnd(bIsWinner);
-	UpdateAchievementsOnGameEnd();
-	UpdateLeaderboardsOnGameEnd();
-
 	Super::GameHasEnded(EndGameFocus, bIsWinner);
 }
 
@@ -619,7 +615,7 @@ void AShooterPlayerController::ClientStartOnlineGame_Implementation()
 		if (OnlineSub)
 		{
 			IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-			if (Sessions.IsValid())
+			if (Sessions.IsValid() && (Sessions->GetNamedSession(ShooterPlayerState->SessionName) != nullptr))
 			{
 				UE_LOG(LogOnline, Log, TEXT("Starting session %s on client"), *ShooterPlayerState->SessionName.ToString() );
 				Sessions->StartSession(ShooterPlayerState->SessionName);
@@ -646,7 +642,7 @@ void AShooterPlayerController::ClientEndOnlineGame_Implementation()
 		if (OnlineSub)
 		{
 			IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-			if (Sessions.IsValid())
+			if (Sessions.IsValid() && (Sessions->GetNamedSession(ShooterPlayerState->SessionName) != nullptr))
 			{
 				UE_LOG(LogOnline, Log, TEXT("Ending session %s on client"), *ShooterPlayerState->SessionName.ToString() );
 				Sessions->EndSession(ShooterPlayerState->SessionName);
@@ -953,21 +949,6 @@ bool AShooterPlayerController::SetPause(bool bPause, FCanUnpause CanUnpauseDeleg
 	const auto Events = Online::GetEventsInterface();
 	const auto LocalPlayer = Cast<ULocalPlayer>(Player);
 	TSharedPtr<const FUniqueNetId> UserId = LocalPlayer ? LocalPlayer->GetCachedUniqueNetId() : nullptr;
-
-	if(PresenceInterface.IsValid() && UserId.IsValid())
-	{
-		FOnlineUserPresenceStatus PresenceStatus;
-		if(Result && bPause)
-		{
-			PresenceStatus.Properties.Add(DefaultPresenceKey, FString("Paused"));
-		}
-		else
-		{
-			PresenceStatus.Properties.Add(DefaultPresenceKey, FString("InGame"));
-		}
-		PresenceInterface->SetPresence(*UserId, PresenceStatus);
-
-	}
 
 	// Don't send pause events while online since the game doesn't actually pause
 	if(GetNetMode() == NM_Standalone && Events.IsValid() && PlayerState->UniqueId.IsValid())

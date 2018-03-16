@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterPlayerState.h"
@@ -202,11 +202,11 @@ void AShooterPlayerState::GetLifetimeReplicatedProps( TArray< FLifetimeProperty 
 
 FString AShooterPlayerState::GetShortPlayerName() const
 {
-	if( PlayerName.Len() > MAX_PLAYER_NAME_LENGTH )
+	if( GetPlayerName().Len() > MAX_PLAYER_NAME_LENGTH )
 	{
-		return PlayerName.Left(MAX_PLAYER_NAME_LENGTH) + "...";
+		return GetPlayerName().Left(MAX_PLAYER_NAME_LENGTH) + "...";
 	}
-	return PlayerName;
+	return GetPlayerName();
 }
 
 void AShooterPlayerState::SetUID(FString uid)
