@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterHUDPCTrackerBase.h"
@@ -16,7 +16,7 @@ TWeakObjectPtr<AShooterPlayerController> ShooterHUDPCTrackerBase::GetPlayerContr
 	{
 		APlayerController* PC = Context.GetPlayerController();
 		AShooterPlayerController* ShooterPC = Cast<AShooterPlayerController>(PC);
-		return TWeakObjectPtr<AShooterPlayerController>(ShooterPC);
+		return MakeWeakObjectPtr(ShooterPC);
 	}
 	else
 	{

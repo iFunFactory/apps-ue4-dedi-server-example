@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "Engine/Console.h"
@@ -646,7 +646,8 @@ void SShooterMenuWidget::Tick( const FGeometry& AllottedGeometry, const double I
 		FViewport* Viewport = GEngine->GameViewport->ViewportFrame->GetViewport();
 		if (Viewport)
 		{
-			ScreenRes = Viewport->GetSizeXY() / AllottedGeometry.Scale;
+			const FVector2D Size = Viewport->GetSizeXY();
+			ScreenRes = (Size / AllottedGeometry.Scale).IntPoint();
 		}
 	}
 

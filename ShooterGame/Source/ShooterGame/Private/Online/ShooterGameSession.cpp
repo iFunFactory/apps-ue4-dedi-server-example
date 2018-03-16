@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 
 #include "ShooterGame.h"
 #include "ShooterGameSession.h"
@@ -65,7 +65,7 @@ void AShooterGameSession::HandleMatchHasStarted()
 	if (OnlineSub)
 	{
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-		if (Sessions.IsValid())
+		if (Sessions.IsValid() && (Sessions->GetNamedSession(NAME_GameSession) != nullptr))
 		{
 			UE_LOG(LogOnlineGame, Log, TEXT("Starting session %s on server"), *FName(NAME_GameSession).ToString());
 			OnStartSessionCompleteDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
@@ -80,12 +80,12 @@ void AShooterGameSession::HandleMatchHasStarted()
  */
 void AShooterGameSession::HandleMatchHasEnded()
 {
-	// start online game locally and wait for completion
+	// end online game locally 
 	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
 	if (OnlineSub)
 	{
 		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
-		if (Sessions.IsValid())
+		if (Sessions.IsValid() && (Sessions->GetNamedSession(NAME_GameSession) != nullptr))
 		{
 			// tell the clients to end
 			for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)

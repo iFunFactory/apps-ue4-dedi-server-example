@@ -1,4 +1,4 @@
-// Copyright 1998-2017 Epic Games, Inc. All Rights Reserved.
+// Copyright 1998-2018 Epic Games, Inc. All Rights Reserved.
 #pragma once
 #include "SlateBasics.h"
 #include "SlateExtras.h"
@@ -28,9 +28,9 @@ public:
 
 	/** TickableObject Functions */
 	virtual void Tick(float DeltaTime) override;	
-	virtual bool IsTickable() const override;	
+	virtual ETickableTickType GetTickableTickType() const override { return ETickableTickType::Always; }
 	virtual TStatId GetStatId() const override;
-	virtual bool IsTickableWhenPaused() const override;	
+	virtual bool IsTickableWhenPaused() const override { return true; }	
 	virtual UWorld* GetTickableGameObjectWorld() const override;
 
 	/** Returns the player that owns the main menu. */
