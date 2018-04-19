@@ -1,0 +1,55 @@
+// Copyright (C) 2013-2015 iFunFactory Inc. All Rights Reserved.
+//
+// This work is confidential and proprietary to iFunFactory Inc. and
+// must not be used, disclosed, copied, or distributed without the prior
+// consent of iFunFactory Inc.
+
+import "funapi/network/fun_message.proto";
+
+message FunMulticastChannelListMessage {
+  required string channel_name = 1;
+  optional uint32 num_members = 2;
+}
+
+
+message FunMulticastMessage {
+  enum ErrorCode {
+    EC_ALREADY_JOINED = 1;
+    EC_ALREADY_LEFT = 2;
+    EC_FULL_MEMBER = 3;
+    EC_CLOSED = 4;
+    EC_INVALID_TOKEN = 5;
+    EC_CANNOT_CREATE_CHANNEL = 6;
+  }
+
+  optional string channel = 1;
+  optional bool join = 2;   // when subscribing to the channel.
+  optional bool leave = 3;  // when unsubscribing from the channel.
+  optional bool bounce = 4;
+  optional string sender = 5;
+  optional ErrorCode error_code = 6;
+  repeated FunMulticastChannelListMessage channels = 7;
+  optional string token = 8;
+
+  ////////////////////////////////////////////////////////////////////
+  // GAME SHOULD EXTEND FunMultiCastMessage.
+  // Field numbers from 10 to 15 are reserved.
+  // Game must use from 16.
+  ////////////////////////////////////////////////////////////////////
+  extensions 10 to max;
+}
+
+
+message FunChatMessage {
+  optional string text = 1;
+}
+
+
+extend FunMulticastMessage {
+  optional FunChatMessage chat = 10;
+}
+
+
+extend FunMessage {
+  optional FunMulticastMessage multicast = 8;
+}

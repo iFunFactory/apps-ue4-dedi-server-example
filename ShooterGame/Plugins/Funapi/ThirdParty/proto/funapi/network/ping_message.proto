@@ -1,0 +1,17 @@
+// Copyright (C) 2013-2015 iFunFactory Inc. All Rights Reserved.
+//
+// This work is confidential and proprietary to iFunFactory Inc. and
+// must not be used, disclosed, copied, or distributed without the prior
+// consent of iFunFactory Inc.
+
+import "funapi/network/fun_message.proto";
+
+message FunPingMessage {
+  required int64 timestamp = 1;
+  optional bytes data = 2;
+}
+
+
+extend FunMessage {
+  optional FunPingMessage cs_ping = 9;
+}
